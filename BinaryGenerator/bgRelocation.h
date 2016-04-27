@@ -8,7 +8,7 @@ enum RelocationType
     RelocationType_DIR64,
 };
 
-class Relocation
+struct Relocation
 {
 public:
     Relocation();

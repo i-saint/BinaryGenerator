@@ -1,6 +1,7 @@
 #pragma once
 namespace bg {
 
+template<class Traits>
 class COFFWriter
 {
 public:
@@ -13,8 +14,5 @@ protected:
     std::ostream *m_os;
     size_t m_written;
 };
-
-typedef COFFWriter COFFWriterx86;
-typedef COFFWriter COFFWriterx86_64;
 
 } // namespace bg

@@ -5,16 +5,16 @@
 
 namespace bg {
 
-String::String() : m_table(), m_rva()
+String::String() : table(), rva()
 {}
 
-String::String(StringTable& table, uint32_t rva)
-    : m_table(&table), m_rva(rva)
+String::String(StringTable& t, uint32_t a)
+    : table(&t), rva(a)
 {}
 
 const char* String::str() const
 {
-    return m_table == nullptr ? nullptr : m_table->get(m_rva);
+    return table == nullptr ? nullptr : table->get(rva);
 }
 
 bool operator==(const String&a, const String& b)

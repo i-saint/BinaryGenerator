@@ -31,6 +31,9 @@
     <ClInclude Include="BinaryGenerator\bgCOFFWriter.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgELF.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinaryGenerator\bgContext.cpp">

@@ -31,13 +31,13 @@ StringTable&        Context::getStringTable() { return *m_str; }
 
 bool Context::writeCOFFx86(std::ostream &os)
 {
-    COFFWriterx86 writer;
+    COFFWriter<Traits_x86> writer;
     return writer.write(*this, os);
 }
 
 bool Context::writeCOFFx86_64(std::ostream &os)
 {
-    COFFWriterx86_64 writer;
+    COFFWriter<Traits_x86_64> writer;
     return writer.write(*this, os);
 }
 

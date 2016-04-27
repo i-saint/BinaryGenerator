@@ -8,20 +8,6 @@
 #include "bgCOFF.h"
 #include "bgCOFFWriter.h"
 
-namespace bg {
-
-COFFWriter::COFFWriter()
-    : m_ctx()
-    , m_os()
-    , m_written()
-{
-
-}
-
-COFFWriter::~COFFWriter()
-{
-
-}
 
 // structure of COFF file
 
@@ -41,20 +27,59 @@ COFFWriter::~COFFWriter()
 //                          //
 //                          //
 //                          //
-// section data * n         //
+// section data x n         //
 //                          //
 //                          //
-//                          //
+// (relocation info)        //
 //--------------------------//
 
-bool COFFWriter::write(Context& ctx, std::ostream& os)
+namespace bg {
+
+template<class T>
+COFFWriter<T>::COFFWriter()
+    : m_ctx()
+    , m_os()
+    , m_written()
 {
+
+}
+
+template<class T>
+COFFWriter<T>::~COFFWriter()
+{
+
+}
+
+template<class Traits> struct COFFImpl;
+
+template<>
+struct COFFImpl<Traits_x86>
+{
+    static const WORD Machine = IMAGE_FILE_MACHINE_I386;
+};
+
+template<>
+struct COFFImpl<Traits_x86_64>
+{
+    static const WORD Machine = IMAGE_FILE_MACHINE_AMD64;
+};
+
+template<class T>
+bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
+{
+    typedef COFFImpl<T> ImplT;
+
     m_ctx = &ctx;
     m_os = &os;
 
     auto& sections = m_ctx->getSections();
     auto& symbols = m_ctx->getSymbolTable().getSymbols();
     auto& strings = m_ctx->getStringTable().getData();
+
+    IMAGE_FILE_HEADER file_header;
+    std::vector<IMAGE_SECTION_HEADER> section_headers;
+    std::vector<std::vector<IMAGE_RELOCATION>> image_relocations;
+    std::vector<IMAGE_SYMBOL> image_symbols;
 
     size_t pos_symbols =
         sizeof(IMAGE_FILE_HEADER) + 
@@ -63,42 +88,71 @@ bool COFFWriter::write(Context& ctx, std::ostream& os)
         sizeof(IMAGE_SYMBOL) * symbols.size() +
         strings.size();
 
+    file_header.Machine = ImplT::Machine;
+    file_header.NumberOfSections = (WORD)sections.size();
+    file_header.TimeDateStamp = 0;
+    file_header.PointerToSymbolTable = (DWORD)pos_symbols;
+    file_header.NumberOfSymbols = (DWORD)symbols.size();
+    file_header.SizeOfOptionalHeader = 0;
+    file_header.Characteristics = 0;
+
+    section_headers.resize(sections.size());
+    image_relocations.resize(sections.size());
+    image_symbols.resize(symbols.size());
+
+    for (size_t i = 0; i < sections.size(); ++i) {
+        auto& section = sections[i];
+        auto& data = section->getData();
+        auto& rels = section->getRelocations();
+
+        auto& sh = section_headers[i];
+        auto& ir = image_relocations[i];
+
+        memcpy(sh.Name, section->getName(), 8);
+        sh.VirtualAddress;
+        sh.SizeOfRawData;
+        sh.PointerToRawData;
+        sh.PointerToRelocations;
+        sh.PointerToLinenumbers = 0;
+        sh.NumberOfRelocations;
+        sh.NumberOfLinenumbers = 0;
+        sh.Characteristics;
+
+        ir.resize(rels.size());
+    }
+
+
     // write headers
     {
-        IMAGE_FILE_HEADER ifh;
-        ifh.Machine = IMAGE_FILE_MACHINE_AMD64;
-        ifh.NumberOfSections = (WORD)sections.size();
-        ifh.TimeDateStamp = 0;
-        ifh.PointerToSymbolTable = (DWORD)pos_symbols;
-        ifh.NumberOfSymbols = (DWORD)symbols.size();
-        ifh.SizeOfOptionalHeader = 0;
-        ifh.Characteristics = 0;
-        os.write((char*)&ifh, sizeof(ifh));
+        m_os->write((char*)&file_header, sizeof(file_header));
     }
-    for (auto& section : sections) {
-        IMAGE_SECTION_HEADER ish;
-        memcpy(ish.Name, section->getName(), 8);
-        ish.VirtualAddress;
-        ish.SizeOfRawData;
-        ish.PointerToRawData;
-        ish.PointerToRelocations;
-        ish.PointerToLinenumbers;
-        ish.NumberOfRelocations;
-        ish.NumberOfLinenumbers;
-        ish.Characteristics;
-        os.write((char*)&ish, sizeof(ish));
+    for (auto& sh : section_headers) {
+        m_os->write((char*)&sh, sizeof(sh));
     }
-    for (auto& sym : symbols) {
-        IMAGE_SYMBOL s;
-        // 
-        os.write((char*)&s, sizeof(s));
+    for (auto& s : image_symbols) {
+        m_os->write((char*)&s, sizeof(s));
     }
     {
-        os.write(strings.c_str(), strings.size());
+        m_os->write(strings.c_str(), strings.size());
     }
 
 
-    return false;
+    // write section contents
+    for (auto& section : sections) {
+        auto& data = section->getData();
+        auto& rels = section->getRelocations();
+        if (!data.empty()) {
+            m_os->write(data.c_str(), data.size());
+        }
+        if (!rels.empty()) {
+            m_os->write((char*)&rels[0], sizeof(IMAGE_RELOCATION) * rels.size());
+        }
+    }
+
+    return true;
 }
+
+template class COFFWriter<Traits_x86>;
+template class COFFWriter<Traits_x86_64>;
 
 } // namespace bg

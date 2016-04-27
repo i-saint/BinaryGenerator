@@ -19,6 +19,7 @@
     <ClInclude Include="BinaryGenerator\bgCOFF.h" />
     <ClInclude Include="BinaryGenerator\bgCOFFWriter.h" />
     <ClInclude Include="BinaryGenerator\bgContext.h" />
+    <ClInclude Include="BinaryGenerator\bgELF.h" />
     <ClInclude Include="BinaryGenerator\bgFoundation.h" />
     <ClInclude Include="BinaryGenerator\bgRelocation.h" />
     <ClInclude Include="BinaryGenerator\bgSection.h" />

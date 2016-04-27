@@ -6,7 +6,7 @@ enum SymbolFlags {
     SymbolFlags_Undefined = 1 << 0,
 };
 
-class Symbol
+struct Symbol
 {
 public:
     Symbol();

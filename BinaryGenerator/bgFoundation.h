@@ -27,13 +27,17 @@ enum SectionType;
 enum SymbolType;
 enum RelocationType;
 
+struct String;
+struct Symbol;
+struct Relocation;
+
 class Context;
 class Section;
-class Symbol;
 class SymbolTable;
-class Relocation;
-class RelocationTable;
-class String;
 class StringTable;
+
+class Traits_x86;
+class Traits_x86_64;
+class Traits_ARM;
 
 } // namespace bg

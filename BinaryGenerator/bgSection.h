@@ -30,7 +30,7 @@ public:
     const char*         getName() const;
     uint32_t            getFlags() const;
     const std::string&  getData() const;
-    Relocations&        getRelocTable();
+    Relocations&        getRelocations();
 
 public:
     Symbol addExternalSymbol(const char *name);

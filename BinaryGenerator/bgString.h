@@ -1,16 +1,15 @@
 #pragma once
 namespace bg {
 
-class String
+struct String
 {
 public:
     String();
-    String(StringTable& table, uint32_t rva);
+    String(StringTable& t, uint32_t a);
     const char* str() const;
 
-private:
-    StringTable* m_table;
-    uint32_t     m_rva;
+    StringTable  *table;
+    uint32_t     rva;
 };
 bool operator==(const String&a, const String& b);
 bool operator<(const String&a, const String& b);

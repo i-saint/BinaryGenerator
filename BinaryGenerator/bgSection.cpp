@@ -47,6 +47,6 @@ Relocation Section::addRelocation(uint32_t pos, const char *name, RelocationType
 const char* Section::getName() const { return m_name; }
 uint32_t Section::getFlags() const { return m_flags; }
 const std::string& Section::getData() const { return m_data; }
-Section::Relocations& Section::getRelocTable() { return m_reloc; }
+Section::Relocations& Section::getRelocations() { return m_reloc; }
 
 } // namespace bg
