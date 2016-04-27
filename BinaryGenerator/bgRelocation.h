@@ -1,5 +1,4 @@
-#ifndef bg_Relocation_h
-#define bg_Relocation_h
+#pragma once
 namespace bg {
 
 enum RelocationType
@@ -30,4 +29,3 @@ private:
 };
 
 } // namespace bg
-#endif // bg_Relocation_h

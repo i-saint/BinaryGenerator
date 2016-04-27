@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "Context.h"
-#include "String.h"
-#include "Symbol.h"
-#include "Relocation.h"
-#include "Section.h"
+#include "bgContext.h"
+#include "bgString.h"
+#include "bgSymbol.h"
+#include "bgRelocation.h"
+#include "bgSection.h"
 
 namespace bg {
 
@@ -37,6 +37,11 @@ Relocation Section::addRelocation(uint32_t pos, const char *name, RelocationType
     ret.sym = addExternalSymbol(name);
     ret.type = type;
     return ret;
+}
+
+void* Section::ptr(uint32_t pos /*= 0*/)
+{
+    return &m_data[pos];
 }
 
 } // namespace bg

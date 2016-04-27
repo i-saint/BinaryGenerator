@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "Context.h"
-#include "String.h"
-#include "Symbol.h"
-#include "Relocation.h"
+#include "bgContext.h"
+#include "bgString.h"
+#include "bgSymbol.h"
+#include "bgRelocation.h"
 
 namespace bg {
 

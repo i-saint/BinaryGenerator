@@ -1,5 +1,4 @@
-#ifndef bg_String_h
-#define bg_String_h
+#pragma once
 namespace bg {
 
 class String
@@ -38,4 +37,3 @@ private:
 };
 
 } // namespace bg
-#endif // bg_String_h

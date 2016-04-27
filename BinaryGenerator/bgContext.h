@@ -1,5 +1,4 @@
-#ifndef bg_Context_h
-#define bg_Context_h
+#pragma once
 namespace bg {
 
 enum SectionType;
@@ -48,4 +47,3 @@ private:
 };
 
 } // namespace bg
-#endif // bg_Context_h

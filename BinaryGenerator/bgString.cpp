@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Context.h"
-#include "String.h"
+#include "bgContext.h"
+#include "bgString.h"
 
 namespace bg {
 

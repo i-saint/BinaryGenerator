@@ -1,6 +1,4 @@
-#ifndef bg_pch_h
-#define bg_pch_h
-
+#pragma once
 #include <vector>
 #include <string>
 #include <map>
@@ -10,5 +8,3 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
-
-#endif // bg_pch_h

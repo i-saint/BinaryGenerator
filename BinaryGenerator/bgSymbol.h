@@ -1,5 +1,4 @@
-#ifndef bg_Symbol_h
-#define bg_Symbol_h
+#pragma once
 namespace bg {
 
 enum SymbolFlags {
@@ -40,4 +39,3 @@ private:
 };
 
 } // namespace bg
-#endif // bg_Symbol_h

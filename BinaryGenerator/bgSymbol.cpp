@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "Context.h"
-#include "String.h"
-#include "Symbol.h"
+#include "bgContext.h"
+#include "bgString.h"
+#include "bgSymbol.h"
 
 namespace bg {
 

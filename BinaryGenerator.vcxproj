@@ -15,24 +15,25 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Context.h" />
+    <ClInclude Include="BinaryGenerator\bgCOFF.h" />
+    <ClInclude Include="BinaryGenerator\bgContext.h" />
+    <ClInclude Include="BinaryGenerator\bgRelocation.h" />
+    <ClInclude Include="BinaryGenerator\bgSection.h" />
+    <ClInclude Include="BinaryGenerator\bgString.h" />
+    <ClInclude Include="BinaryGenerator\bgSymbol.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Relocation.h" />
-    <ClInclude Include="Section.h" />
-    <ClInclude Include="String.h" />
-    <ClInclude Include="Symbol.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Context.cpp" />
+    <ClCompile Include="BinaryGenerator\bgContext.cpp" />
+    <ClCompile Include="BinaryGenerator\bgRelocation.cpp" />
+    <ClCompile Include="BinaryGenerator\bgSection.cpp" />
+    <ClCompile Include="BinaryGenerator\bgString.cpp" />
+    <ClCompile Include="BinaryGenerator\bgSymbol.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Relocation.cpp" />
-    <ClCompile Include="Section.cpp" />
-    <ClCompile Include="String.cpp" />
-    <ClCompile Include="Symbol.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08361722-5520-47AC-A0C2-31E8A062B73F}</ProjectGuid>

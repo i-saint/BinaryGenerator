@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="BinaryGenerator">
+      <UniqueIdentifier>{48824857-aa8e-4466-97b6-ecdab0a44867}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BinaryGenerator\bgCOFF.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgContext.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgRelocation.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgSection.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgString.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgSymbol.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BinaryGenerator\bgContext.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryGenerator\bgRelocation.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryGenerator\bgSection.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryGenerator\bgString.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryGenerator\bgSymbol.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
