@@ -8,11 +8,12 @@
 namespace bg {
 
 Context::Context()
-    : m_text(new Section())
-    , m_idata(new Section())
-    , m_udata(new Section())
-    , m_reloc(new RelocationTable())
-    , m_str(new StringTable())
+    : m_text(new Section(this))
+    , m_idata(new Section(this))
+    , m_udata(new Section(this))
+    , m_sym(new SymbolTable(this))
+    , m_reloc(new RelocationTable(this))
+    , m_str(new StringTable(this))
 {
 }
 
@@ -20,7 +21,8 @@ Section&            Context::getText() { return *m_text; }
 Section&            Context::getIData() { return *m_idata; }
 Section&            Context::getUData() { return *m_udata; }
 RelocationTable&    Context::getRelocTable() { return *m_reloc; }
-StringTable&        Context::getStringPool() { return *m_str; }
+SymbolTable&        Context::getSymbolTable() { return *m_sym; }
+StringTable&        Context::getStringTable() { return *m_str; }
 
 
 bool Context::writeCOFFx86(std::ostream &os)

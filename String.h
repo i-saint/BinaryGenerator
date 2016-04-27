@@ -24,14 +24,17 @@ struct CharCompare
 class StringTable
 {
 public:
-    StringTable();
-    String make(const char *str);
-    String make(uint32_t i);
+    StringTable(Context *ctx);
+    const String& addString(const char *str);
     const char* get(uint32_t i);
 
+public:
+    const std::string& getTable() const;
+
 private:
-    std::string m_pool;
-    std::map<const char*, uint32_t, CharCompare> m_table;
+    Context *m_ctx;
+    std::string m_table;
+    std::map<const char*, String, CharCompare> m_entries;
 };
 
 } // namespace bg

@@ -32,31 +32,31 @@ bool CharCompare::operator()(const char *a, const char *b) const
 
 
 
-StringTable::StringTable()
+StringTable::StringTable(Context *ctx)
+    : m_ctx(ctx)
 {
 }
 
-String StringTable::make(const char *str)
+const String& StringTable::addString(const char *str)
 {
-    auto i = m_table.find(str);
-    if (i != m_table.end()) {
-        return String(*this, i->second);
+    auto i = m_entries.find(str);
+    if (i != m_entries.end()) {
+        return i->second;
     }
     else {
-        size_t pos = m_pool.size();
-        m_pool.insert(m_pool.end(), str, str + strlen(str) + 1);
-        return String(*this, (uint32_t)pos);
+        auto pos = (uint32_t)m_table.size();
+        m_table.insert(m_table.end(), str, str + strlen(str) + 1);
+        auto e = m_entries.insert(std::make_pair(&m_table[pos], String(*this, pos)));
+        return e.first->second;
     }
-}
-
-String StringTable::make(uint32_t i)
-{
-    return String(*this, i);
 }
 
 const char* StringTable::get(uint32_t i)
 {
-    return &m_pool[i];
+    return &m_table[i];
 }
+
+const std::string& StringTable::getTable() const { return m_table; }
+
 
 } // namespace bg

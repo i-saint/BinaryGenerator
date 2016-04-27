@@ -2,6 +2,10 @@
 #define bg_Context_h
 namespace bg {
 
+enum SectionType;
+enum SymbolType;
+enum RelocationType;
+
 class Context;
 class Section;
 class Symbol;
@@ -21,7 +25,8 @@ public:
     Section&            getIData();
     Section&            getUData();
     RelocationTable&    getRelocTable();
-    StringTable&        getStringPool();
+    SymbolTable&        getSymbolTable();
+    StringTable&        getStringTable();
 
     bool writeCOFFx86(std::ostream &os);
     bool writeCOFFx86_64(std::ostream &os);
