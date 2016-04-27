@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "bgFoundation.h"
 #include "bgContext.h"
 #include "bgString.h"
 #include "bgSymbol.h"
@@ -7,10 +8,13 @@
 
 namespace bg {
 
-Section::Section(Context *ctx)
+Section::Section(Context *ctx, const char *name, uint32_t flags)
     : m_ctx(ctx)
-    , m_flags()
+    , m_flags(flags)
 {
+    memset(m_name, 0, sizeof(m_name));
+    strncpy(m_name, name, 7);
+
 }
 
 Symbol Section::addSymbol(const void *data_, size_t len, const char *name)

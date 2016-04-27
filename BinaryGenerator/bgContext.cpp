@@ -1,25 +1,30 @@
 #include "pch.h"
+#include "bgFoundation.h"
 #include "bgContext.h"
 #include "bgString.h"
 #include "bgSymbol.h"
 #include "bgRelocation.h"
 #include "bgSection.h"
+#include "bgCOFF.h"
 
 namespace bg {
 
 Context::Context()
-    : m_text(new Section(this))
-    , m_idata(new Section(this))
-    , m_udata(new Section(this))
-    , m_sym(new SymbolTable(this))
+    : m_sym(new SymbolTable(this))
     , m_reloc(new RelocationTable(this))
     , m_str(new StringTable(this))
 {
 }
 
-Section&            Context::getText() { return *m_text; }
-Section&            Context::getIData() { return *m_idata; }
-Section&            Context::getUData() { return *m_udata; }
+size_t Context::getNumSections() const { return m_sections.size(); }
+Section* Context::getSection(size_t i) { return m_sections[i].get(); }
+Section* Context::createSection(const char *name, uint32_t flags)
+{
+    auto *s = new Section(this, name, flags);
+    m_sections.emplace_back(SectionPtr(s));
+    return s;
+}
+
 RelocationTable&    Context::getRelocTable() { return *m_reloc; }
 SymbolTable&        Context::getSymbolTable() { return *m_sym; }
 StringTable&        Context::getStringTable() { return *m_str; }

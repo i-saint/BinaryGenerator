@@ -1,28 +1,16 @@
 #pragma once
 namespace bg {
 
-enum SectionType;
-enum SymbolType;
-enum RelocationType;
-
-class Context;
-class Section;
-class Symbol;
-class SymbolTable;
-class Relocation;
-class RelocationTable;
-class String;
-class StringTable;
-
-
 class Context
 {
 public:
     Context();
 
-    Section&            getText();
-    Section&            getIData();
-    Section&            getUData();
+    size_t              getNumSections() const;
+    Section*            getSection(size_t i);
+    // flags: combination of SectionType
+    Section*            createSection(const char *name, uint32_t flags);
+
     RelocationTable&    getRelocTable();
     SymbolTable&        getSymbolTable();
     StringTable&        getStringTable();
@@ -37,10 +25,9 @@ private:
     typedef std::unique_ptr<SymbolTable>        SymbolTablePtr;
     typedef std::unique_ptr<RelocationTable>    RelocationTablePtr;
     typedef std::unique_ptr<StringTable>        StringTablePtr;
+    typedef std::vector<SectionPtr>             Sections;
 
-    SectionPtr          m_text;
-    SectionPtr          m_idata;
-    SectionPtr          m_udata;
+    Sections            m_sections;
     SymbolTablePtr      m_sym;
     RelocationTablePtr  m_reloc;
     StringTablePtr      m_str;

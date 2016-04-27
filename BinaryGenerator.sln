@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BinaryGenerator", "BinaryGenerator.vcxproj", "{08361722-5520-47AC-A0C2-31E8A062B73F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{A5A32F74-B72B-4A57-8CDF-04C9FCCF5FDD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{0453A6D4-2184-415A-8BD5-9C6C90A533D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -18,8 +22,17 @@ Global
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.MasterDLL|x64.Build.0 = MasterDLL|x64
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.MasterLib|x64.ActiveCfg = MasterLib|x64
 		{08361722-5520-47AC-A0C2-31E8A062B73F}.MasterLib|x64.Build.0 = MasterLib|x64
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7}.Debug|x64.ActiveCfg = Debug|x64
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7}.Debug|x64.Build.0 = Debug|x64
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7}.MasterDLL|x64.ActiveCfg = MasterDLL|x64
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7}.MasterDLL|x64.Build.0 = MasterDLL|x64
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7}.MasterLib|x64.ActiveCfg = MasterLib|x64
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7}.MasterLib|x64.Build.0 = MasterLib|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0453A6D4-2184-415A-8BD5-9C6C90A533D7} = {A5A32F74-B72B-4A57-8CDF-04C9FCCF5FDD}
 	EndGlobalSection
 EndGlobal

@@ -15,37 +15,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BinaryGenerator.h" />
-    <ClInclude Include="BinaryGenerator\bgCOFF.h" />
-    <ClInclude Include="BinaryGenerator\bgContext.h" />
-    <ClInclude Include="BinaryGenerator\bgFoundation.h" />
-    <ClInclude Include="BinaryGenerator\bgRelocation.h" />
-    <ClInclude Include="BinaryGenerator\bgSection.h" />
-    <ClInclude Include="BinaryGenerator\bgString.h" />
-    <ClInclude Include="BinaryGenerator\bgSymbol.h" />
-    <ClInclude Include="pch.h" />
+    <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BinaryGenerator\bgContext.cpp" />
-    <ClCompile Include="BinaryGenerator\bgRelocation.cpp" />
-    <ClCompile Include="BinaryGenerator\bgSection.cpp" />
-    <ClCompile Include="BinaryGenerator\bgString.cpp" />
-    <ClCompile Include="BinaryGenerator\bgSymbol.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ProjectReference Include="..\BinaryGenerator.vcxproj">
+      <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{08361722-5520-47AC-A0C2-31E8A062B73F}</ProjectGuid>
+    <ProjectGuid>{0453A6D4-2184-415A-8BD5-9C6C90A533D7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformToolset>v140</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'" Label="Configuration">
     <PlatformToolset>v140</PlatformToolset>
@@ -85,7 +70,7 @@
       </Command>
     </PostBuildEvent>
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>utjDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -105,7 +90,7 @@
       </Command>
     </PostBuildEvent>
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zo %(AdditionalOptions)</AdditionalOptions>
@@ -132,7 +117,7 @@
       </Command>
     </PostBuildEvent>
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zo %(AdditionalOptions)</AdditionalOptions>

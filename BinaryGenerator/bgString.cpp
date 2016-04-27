@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "bgFoundation.h"
 #include "bgContext.h"
 #include "bgString.h"
 

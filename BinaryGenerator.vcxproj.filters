@@ -24,6 +24,10 @@
     <ClInclude Include="BinaryGenerator\bgSymbol.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
+    <ClInclude Include="BinaryGenerator\bgFoundation.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinaryGenerator\bgContext.cpp">
