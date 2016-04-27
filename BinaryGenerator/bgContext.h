@@ -4,6 +4,12 @@ namespace bg {
 class Context
 {
 public:
+    typedef std::unique_ptr<Section>            SectionPtr;
+    typedef std::unique_ptr<SymbolTable>        SymbolTablePtr;
+    typedef std::unique_ptr<StringTable>        StringTablePtr;
+    typedef std::vector<SectionPtr>             Sections;
+
+public:
     Context();
 
     size_t              getNumSections() const;
@@ -11,7 +17,7 @@ public:
     // flags: combination of SectionType
     Section*            createSection(const char *name, uint32_t flags);
 
-    RelocationTable&    getRelocTable();
+    Sections&           getSections();
     SymbolTable&        getSymbolTable();
     StringTable&        getStringTable();
 
@@ -21,15 +27,8 @@ public:
     bool writeELFx86_64(std::ostream &os);
 
 private:
-    typedef std::unique_ptr<Section>            SectionPtr;
-    typedef std::unique_ptr<SymbolTable>        SymbolTablePtr;
-    typedef std::unique_ptr<RelocationTable>    RelocationTablePtr;
-    typedef std::unique_ptr<StringTable>        StringTablePtr;
-    typedef std::vector<SectionPtr>             Sections;
-
     Sections            m_sections;
     SymbolTablePtr      m_sym;
-    RelocationTablePtr  m_reloc;
     StringTablePtr      m_str;
 };
 

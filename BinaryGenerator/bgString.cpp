@@ -57,7 +57,7 @@ const char* StringTable::get(uint32_t i)
     return &m_table[i];
 }
 
-const std::string& StringTable::getTable() const { return m_table; }
+const std::string& StringTable::getData() const { return m_table; }
 
 
 } // namespace bg

@@ -28,7 +28,7 @@ public:
     const char* get(uint32_t i);
 
 public:
-    const std::string& getTable() const;
+    const std::string& getData() const;
 
 private:
     Context *m_ctx;

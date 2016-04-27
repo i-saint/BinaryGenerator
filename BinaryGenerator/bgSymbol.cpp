@@ -21,6 +21,11 @@ SymbolTable::SymbolTable(Context *ctx)
 {
 }
 
+SymbolTable::Symbols& SymbolTable::getSymbols()
+{
+    return m_symbols;
+}
+
 const Symbol& SymbolTable::insert(const Symbol& sym)
 {
     for (const auto& s : m_symbols) {

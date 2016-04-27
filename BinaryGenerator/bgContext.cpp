@@ -5,13 +5,12 @@
 #include "bgSymbol.h"
 #include "bgRelocation.h"
 #include "bgSection.h"
-#include "bgCOFF.h"
+#include "bgCOFFWriter.h"
 
 namespace bg {
 
 Context::Context()
     : m_sym(new SymbolTable(this))
-    , m_reloc(new RelocationTable(this))
     , m_str(new StringTable(this))
 {
 }
@@ -25,19 +24,21 @@ Section* Context::createSection(const char *name, uint32_t flags)
     return s;
 }
 
-RelocationTable&    Context::getRelocTable() { return *m_reloc; }
+Context::Sections&  Context::getSections() { return m_sections; }
 SymbolTable&        Context::getSymbolTable() { return *m_sym; }
 StringTable&        Context::getStringTable() { return *m_str; }
 
 
 bool Context::writeCOFFx86(std::ostream &os)
 {
-    return false;
+    COFFWriterx86 writer;
+    return writer.write(*this, os);
 }
 
 bool Context::writeCOFFx86_64(std::ostream &os)
 {
-    return false;
+    COFFWriterx86_64 writer;
+    return writer.write(*this, os);
 }
 
 bool Context::writeELFx86(std::ostream &os)

@@ -19,20 +19,28 @@ enum SectionType {
 class Section
 {
 public:
+    typedef std::vector<Relocation> Relocations;
+
+public:
     Section(Context *ctx, const char *name, uint32_t flags);
 
-    Symbol addSymbol(const void *data, size_t len, const char *name);
-    Relocation addRelocation(uint32_t pos, const char *name, RelocationType type);
+    Symbol              addSymbol(const void *data, size_t len, const char *name);
+    Relocation          addRelocation(uint32_t pos, const char *name, RelocationType type);
+
+    const char*         getName() const;
+    uint32_t            getFlags() const;
+    const std::string&  getData() const;
+    Relocations&        getRelocTable();
 
 public:
     Symbol addExternalSymbol(const char *name);
-    void* ptr(uint32_t pos = 0);
 
 private:
     Context *m_ctx;
     char m_name[8];
     uint32_t m_flags;
-    std::vector<char> m_data;
+    std::string m_data;
+    std::vector<Relocation> m_reloc;
 };
 
 } // namespace bg

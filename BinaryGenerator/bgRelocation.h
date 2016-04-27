@@ -19,13 +19,4 @@ public:
     RelocationType type;
 };
 
-class RelocationTable
-{
-public:
-    RelocationTable(Context *ctx);
-
-private:
-    Context *m_ctx;
-};
-
 } // namespace bg

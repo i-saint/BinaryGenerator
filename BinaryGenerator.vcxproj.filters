@@ -28,6 +28,9 @@
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
     <ClInclude Include="BinaryGenerator.h" />
+    <ClInclude Include="BinaryGenerator\bgCOFFWriter.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinaryGenerator\bgContext.cpp">
@@ -43,6 +46,9 @@
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
     <ClCompile Include="BinaryGenerator\bgSymbol.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryGenerator\bgCOFFWriter.cpp">
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
   </ItemGroup>

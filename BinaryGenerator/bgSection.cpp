@@ -40,12 +40,13 @@ Relocation Section::addRelocation(uint32_t pos, const char *name, RelocationType
     ret.rva = pos;
     ret.sym = addExternalSymbol(name);
     ret.type = type;
+    m_reloc.emplace_back(ret);
     return ret;
 }
 
-void* Section::ptr(uint32_t pos /*= 0*/)
-{
-    return &m_data[pos];
-}
+const char* Section::getName() const { return m_name; }
+uint32_t Section::getFlags() const { return m_flags; }
+const std::string& Section::getData() const { return m_data; }
+Section::Relocations& Section::getRelocTable() { return m_reloc; }
 
 } // namespace bg

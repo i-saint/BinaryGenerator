@@ -21,21 +21,16 @@ public:
 class SymbolTable
 {
 public:
-    SymbolTable(Context *ctx);
-    const Symbol& insert(const Symbol& sym);
+    typedef std::vector<Symbol> Symbols;
 
-    // Body: [](const Symbol& sym) -> void
-    template<class Body>
-    void each(const Body& body)
-    {
-        for (const auto& sym : m_symbols) {
-            body(sym);
-        }
-    }
+public:
+    SymbolTable(Context *ctx);
+    Symbols& getSymbols();
+    const Symbol& insert(const Symbol& sym);
 
 private:
     Context *m_ctx;
-    std::vector<Symbol> m_symbols;
+    Symbols m_symbols;
 };
 
 } // namespace bg

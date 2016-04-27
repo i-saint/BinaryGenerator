@@ -15,9 +15,4 @@ Relocation::Relocation()
 {
 }
 
-RelocationTable::RelocationTable(Context *ctx)
-    : m_ctx(ctx)
-{
-}
-
 } // namespace bg
