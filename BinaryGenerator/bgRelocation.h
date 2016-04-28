@@ -3,9 +3,11 @@ namespace bg {
 
 enum RelocationType
 {
+    RelocationType_ABS,
     RelocationType_REL32,
-    RelocationType_DIR32,
-    RelocationType_DIR64,
+    RelocationType_ADDR32,
+    RelocationType_ADDR32NB,
+    RelocationType_ADDR64,
 };
 
 struct Relocation
@@ -15,7 +17,7 @@ public:
 
     Section *section;
     uint32_t rva;
-    Symbol sym;
+    uint32_t symbol_index;
     RelocationType type;
 };
 

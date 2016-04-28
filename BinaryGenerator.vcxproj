@@ -17,7 +17,6 @@
   <ItemGroup>
     <ClInclude Include="BinaryGenerator.h" />
     <ClInclude Include="BinaryGenerator\bgCOFF.h" />
-    <ClInclude Include="BinaryGenerator\bgCOFFWriter.h" />
     <ClInclude Include="BinaryGenerator\bgContext.h" />
     <ClInclude Include="BinaryGenerator\bgELF.h" />
     <ClInclude Include="BinaryGenerator\bgFoundation.h" />
@@ -25,11 +24,13 @@
     <ClInclude Include="BinaryGenerator\bgSection.h" />
     <ClInclude Include="BinaryGenerator\bgString.h" />
     <ClInclude Include="BinaryGenerator\bgSymbol.h" />
+    <ClInclude Include="BinaryGenerator\bgWriter.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinaryGenerator\bgCOFFWriter.cpp" />
     <ClCompile Include="BinaryGenerator\bgContext.cpp" />
+    <ClCompile Include="BinaryGenerator\bgELFWriter.cpp" />
     <ClCompile Include="BinaryGenerator\bgRelocation.cpp" />
     <ClCompile Include="BinaryGenerator\bgSection.cpp" />
     <ClCompile Include="BinaryGenerator\bgString.cpp" />

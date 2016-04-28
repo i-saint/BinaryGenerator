@@ -13,7 +13,8 @@ enum SectionFlag {
     SectionFlag_Info    = 1 << 7,
     SectionFlag_Remove  = 1 << 8,
 
-    SectionType_Text    = SectionFlag_Read | SectionFlag_Write | SectionFlag_Execute | SectionFlag_Code,
+    SectionType_Text    = SectionFlag_Read | SectionFlag_Execute | SectionFlag_Code,
+    SectionType_TextX   = SectionFlag_Read | SectionFlag_Write | SectionFlag_Execute | SectionFlag_Code,
     SectionType_IData   = SectionFlag_Read | SectionFlag_IData,
     SectionType_UData   = SectionFlag_Read | SectionFlag_Write | SectionFlag_Udata,
     SectionType_Info    = SectionFlag_Info | SectionFlag_Remove,
@@ -28,7 +29,7 @@ public:
 public:
     Section(Context *ctx, const char *name, uint32_t index, uint32_t flags);
 
-    Symbol              addSymbol(const void *data, size_t len, const char *name, uint32_t flags = SymbolFlags_External);
+    Symbol              addSymbol(const void *data, size_t len, const char *name, uint32_t flags = SymbolFlag_External);
     Relocation          addRelocation(uint32_t pos, const char *name, RelocationType type);
 
     const char*         getName() const;

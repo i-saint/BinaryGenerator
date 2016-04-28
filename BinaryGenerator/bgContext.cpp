@@ -5,7 +5,7 @@
 #include "bgSymbol.h"
 #include "bgRelocation.h"
 #include "bgSection.h"
-#include "bgCOFFWriter.h"
+#include "bgWriter.h"
 
 namespace bg {
 
@@ -34,41 +34,41 @@ bool Context::writeCOFFx86(const char *path)
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     return writeCOFFx86(ofs);
 }
-bool Context::writeCOFFx86(std::ostream &os)
-{
-    COFFWriter<Traits_x86> writer;
-    return writer.write(*this, os);
-}
-bool Context::writeCOFFx86_64(const char *path)
+bool Context::writeCOFFx64(const char *path)
 {
     std::fstream ofs(path, std::ios::binary | std::ios::out);
-    return writeCOFFx86_64(ofs);
+    return writeCOFFx64(ofs);
 }
-
-bool Context::writeCOFFx86_64(std::ostream &os)
-{
-    COFFWriter<Traits_x86_64> writer;
-    return writer.write(*this, os);
-}
-
 bool Context::writeELFx86(const char *path)
 {
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     return writeELFx86(ofs);
 }
-bool Context::writeELFx86(std::ostream &os)
-{
-    return false;
-}
-
-bool Context::writeELFx86_64(const char *path)
+bool Context::writeELFx64(const char *path)
 {
     std::fstream ofs(path, std::ios::binary | std::ios::out);
-    return writeELFx86_64(ofs);
+    return writeELFx64(ofs);
 }
-bool Context::writeELFx86_64(std::ostream &os)
+
+bool Context::writeCOFFx86(std::ostream &os)
 {
-    return false;
+    COFFWriter<Traits_x86> writer;
+    return writer.write(*this, os);
+}
+bool Context::writeCOFFx64(std::ostream &os)
+{
+    COFFWriter<Traits_x64> writer;
+    return writer.write(*this, os);
+}
+bool Context::writeELFx86(std::ostream &os)
+{
+    ELFWriter<Traits_x86> writer;
+    return writer.write(*this, os);
+}
+bool Context::writeELFx64(std::ostream &os)
+{
+    ELFWriter<Traits_x64> writer;
+    return writer.write(*this, os);
 }
 
 } // namespace bg

@@ -7,7 +7,7 @@ typedef long            LONG;
 typedef unsigned char   BYTE;
 typedef unsigned short  WORD;
 typedef unsigned long   DWORD;
-#define UNALIGNED __unaligned
+#define UNALIGNED 
 
 
 #define IMAGE_FILE_RELOCS_STRIPPED           0x0001  // Relocation info stripped from file.

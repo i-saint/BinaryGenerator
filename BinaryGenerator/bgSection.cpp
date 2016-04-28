@@ -39,7 +39,7 @@ Relocation Section::addRelocation(uint32_t pos, const char *name, RelocationType
     auto ret = Relocation();
     ret.section = this;
     ret.rva = pos;
-    ret.sym = addExternalSymbol(name);
+    ret.symbol_index = addExternalSymbol(name).index;
     ret.type = type;
     m_reloc.emplace_back(ret);
     return ret;

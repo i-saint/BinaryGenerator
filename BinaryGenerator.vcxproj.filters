@@ -28,10 +28,11 @@
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
     <ClInclude Include="BinaryGenerator.h" />
-    <ClInclude Include="BinaryGenerator\bgCOFFWriter.h">
+    <ClInclude Include="BinaryGenerator\bgELF.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="BinaryGenerator\bgELF.h">
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="BinaryGenerator\bgWriter.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
   </ItemGroup>
@@ -52,6 +53,10 @@
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
     <ClCompile Include="BinaryGenerator\bgCOFFWriter.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="BinaryGenerator\bgELFWriter.cpp">
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
   </ItemGroup>

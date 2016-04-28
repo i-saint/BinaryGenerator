@@ -37,7 +37,7 @@ class SymbolTable;
 class StringTable;
 
 class Traits_x86;
-class Traits_x86_64;
+class Traits_x64;
 class Traits_ARM;
 
 } // namespace bg

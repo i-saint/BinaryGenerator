@@ -23,13 +23,13 @@ public:
 
 
     bool writeCOFFx86(const char *path);
-    bool writeCOFFx86(std::ostream &os);
-    bool writeCOFFx86_64(const char *path);
-    bool writeCOFFx86_64(std::ostream &os);
+    bool writeCOFFx64(const char *path);
     bool writeELFx86(const char *path);
+    bool writeELFx64(const char *path);
+    bool writeCOFFx86(std::ostream &os);
+    bool writeCOFFx64(std::ostream &os);
     bool writeELFx86(std::ostream &os);
-    bool writeELFx86_64(const char *path);
-    bool writeELFx86_64(std::ostream &os);
+    bool writeELFx64(std::ostream &os);
 
 private:
     Sections            m_sections;

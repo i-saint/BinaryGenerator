@@ -6,7 +6,7 @@
 #include "bgRelocation.h"
 #include "bgSection.h"
 #include "bgCOFF.h"
-#include "bgCOFFWriter.h"
+#include "bgWriter.h"
 
 
 // structure of COFF file
@@ -49,7 +49,7 @@ struct COFFImpl<Traits_x86>
 };
 
 template<>
-struct COFFImpl<Traits_x86_64>
+struct COFFImpl<Traits_x64>
 {
     static const WORD Machine = IMAGE_FILE_MACHINE_AMD64;
 };
@@ -61,15 +61,14 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
 
     m_ctx = &ctx;
     m_os = &os;
-
     auto& sections = m_ctx->getSections();
     auto& symbols = m_ctx->getSymbolTable().getSymbols();
     auto& strings = m_ctx->getStringTable().getData();
 
-    IMAGE_FILE_HEADER file_header;
-    std::vector<IMAGE_SECTION_HEADER> section_headers;
-    std::vector<std::vector<IMAGE_RELOCATION>> image_relocations;
-    std::vector<IMAGE_SYMBOL> image_symbols;
+    IMAGE_FILE_HEADER coff_header;
+    std::vector<IMAGE_SECTION_HEADER> coff_sects;
+    std::vector<std::vector<IMAGE_RELOCATION>> coff_rels;
+    std::vector<IMAGE_SYMBOL> coff_syms;
 
     DWORD pos_sections = DWORD(
         IMAGE_SIZEOF_FILE_HEADER +
@@ -81,22 +80,22 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         pos_symbols += (DWORD)(sizeof(IMAGE_RELOCATION) * s->getRelocations().size());
     }
 
-    file_header.Machine = ImplT::Machine;
-    file_header.NumberOfSections = (WORD)sections.size();
-    file_header.TimeDateStamp = 0;
-    file_header.PointerToSymbolTable = pos_symbols;
-    file_header.NumberOfSymbols = (DWORD)symbols.size();
-    file_header.SizeOfOptionalHeader = 0;
-    file_header.Characteristics = 0;
+    coff_header.Machine = ImplT::Machine;
+    coff_header.NumberOfSections = (WORD)sections.size();
+    coff_header.TimeDateStamp = 0;
+    coff_header.PointerToSymbolTable = pos_symbols;
+    coff_header.NumberOfSymbols = (DWORD)symbols.size();
+    coff_header.SizeOfOptionalHeader = 0;
+    coff_header.Characteristics = 0;
 
-    section_headers.resize(sections.size());
-    image_relocations.resize(sections.size());
-    image_symbols.resize(symbols.size());
+    coff_sects.resize(sections.size());
+    coff_rels.resize(sections.size());
+    coff_syms.resize(symbols.size());
 
     // build symbol info
     for (size_t si = 0; si < symbols.size(); ++si) {
         auto& sym = symbols[si];
-        auto& isym = image_symbols[si];
+        auto& isym = coff_syms[si];
 
         isym.N.Name.Short = 0;
         isym.N.Name.Long = sym.name.rva;
@@ -104,10 +103,10 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : 0;
         isym.Type = IMAGE_SYM_TYPE_NULL;
         isym.StorageClass = IMAGE_SYM_CLASS_NULL;
-        if ((sym.flags & SymbolFlags_Static)) {
+        if ((sym.flags & SymbolFlag_Static)) {
             isym.StorageClass = IMAGE_SYM_CLASS_STATIC;
         }
-        if ((sym.flags & SymbolFlags_External)) {
+        if ((sym.flags & SymbolFlag_External)) {
             isym.StorageClass = IMAGE_SYM_CLASS_EXTERNAL;
         }
         isym.NumberOfAuxSymbols = 0;
@@ -119,8 +118,8 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         auto& data = section->getData();
         auto& rels = section->getRelocations();
 
-        auto& sh = section_headers[si];
-        auto& irels = image_relocations[si];
+        auto& sh = coff_sects[si];
+        auto& irels = coff_rels[si];
 
         memcpy(sh.Name, section->getName(), 8);
         sh.VirtualAddress = 0;
@@ -132,10 +131,14 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         sh.NumberOfLinenumbers = 0;
         sh.Characteristics = translateSectionFlags(section->getFlags());
 
+        // build relocation info
         irels.resize(rels.size());
         for (size_t ri = 0; ri < rels.size(); ++ri) {
             auto& rel = rels[ri];
-            auto& irel = irels[ri];
+            auto& coff = irels[ri];
+            coff.DUMMYUNIONNAME.VirtualAddress = rel.rva;
+            coff.SymbolTableIndex = rel.symbol_index;
+            coff.Type = translateRelocationType(rel.type);
         }
 
         pos_sections += sh.SizeOfRawData;
@@ -146,10 +149,10 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     // write actual data
 
     // file header
-    m_os->write((char*)&file_header, IMAGE_SIZEOF_FILE_HEADER);
+    m_os->write((char*)&coff_header, IMAGE_SIZEOF_FILE_HEADER);
 
     // section headers
-    for (auto& sh : section_headers) {
+    for (auto& sh : coff_sects) {
         m_os->write((char*)&sh, IMAGE_SIZEOF_SECTION_HEADER);
     }
 
@@ -166,7 +169,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     }
 
     // symbol table
-    for (auto& s : image_symbols) {
+    for (auto& s : coff_syms) {
         m_os->write((char*)&s, IMAGE_SIZEOF_SYMBOL);
     }
 
@@ -218,7 +221,33 @@ uint32_t COFFWriter<T>::translateSectionFlags(uint32_t flags)
     return r;
 }
 
+template<>
+uint32_t COFFWriter<Traits_x86>::translateRelocationType(RelocationType rel)
+{
+    switch (rel) {
+    case RelocationType_ABS: return IMAGE_REL_I386_ABSOLUTE;
+    case RelocationType_REL32: return IMAGE_REL_I386_REL32;
+    case RelocationType_ADDR32: return IMAGE_REL_I386_DIR32;
+    case RelocationType_ADDR32NB: return IMAGE_REL_I386_DIR32NB;
+    case RelocationType_ADDR64: break;
+    }
+    return 0;
+}
+
+template<>
+uint32_t COFFWriter<Traits_x64>::translateRelocationType(RelocationType rel)
+{
+    switch (rel) {
+    case RelocationType_ABS: return IMAGE_REL_AMD64_ABSOLUTE;
+    case RelocationType_REL32: return IMAGE_REL_AMD64_REL32;
+    case RelocationType_ADDR32: return IMAGE_REL_AMD64_ADDR32;
+    case RelocationType_ADDR32NB: return IMAGE_REL_AMD64_ADDR32NB;
+    case RelocationType_ADDR64: return IMAGE_REL_AMD64_ADDR64;
+    }
+    return 0;
+}
+
 template class COFFWriter<Traits_x86>;
-template class COFFWriter<Traits_x86_64>;
+template class COFFWriter<Traits_x64>;
 
 } // namespace bg
