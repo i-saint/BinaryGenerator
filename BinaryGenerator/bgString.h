@@ -14,11 +14,6 @@ public:
 bool operator==(const String&a, const String& b);
 bool operator<(const String&a, const String& b);
 
-struct CharCompare
-{
-    bool operator()(const char *a, const char *b) const;
-};
-
 class StringTable
 {
 public:
@@ -32,7 +27,7 @@ public:
 private:
     Context *m_ctx;
     std::string m_table;
-    std::map<const char*, String, CharCompare> m_entries;
+    std::map<std::string, String> m_entries;
 };
 
 } // namespace bg

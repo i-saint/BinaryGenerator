@@ -19,7 +19,7 @@ size_t Context::getNumSections() const { return m_sections.size(); }
 Section* Context::getSection(size_t i) { return m_sections[i].get(); }
 Section* Context::createSection(const char *name, uint32_t flags)
 {
-    auto *s = new Section(this, name, flags);
+    auto *s = new Section(this, name, (uint32_t)m_sections.size(), flags);
     m_sections.emplace_back(SectionPtr(s));
     return s;
 }

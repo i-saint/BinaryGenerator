@@ -26,11 +26,6 @@ bool operator<(const String&a, const String& b)
     return std::strcmp(a.str(), b.str()) < 0;
 }
 
-bool CharCompare::operator()(const char *a, const char *b) const
-{
-    return std::strcmp(a, b) < 0;
-}
-
 
 
 StringTable::StringTable(Context *ctx)
@@ -45,9 +40,9 @@ const String& StringTable::addString(const char *str)
         return i->second;
     }
     else {
-        auto pos = (uint32_t)m_table.size();
+        auto pos = (uint32_t)m_table.size() + 4;
         m_table.insert(m_table.end(), str, str + strlen(str) + 1);
-        auto e = m_entries.insert(std::make_pair(&m_table[pos], String(*this, pos)));
+        auto e = m_entries.insert(std::make_pair(str, String(*this, pos)));
         return e.first->second;
     }
 }

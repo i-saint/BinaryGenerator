@@ -11,8 +11,8 @@ Symbol::Symbol()
 {
 }
 
-Symbol::Symbol(Section *s, uint32_t a, const String& n)
-    : section(s), rva(a), flags(), name(n)
+Symbol::Symbol(Section *s, uint32_t a, const String& n, uint32_t f)
+    : section(s), rva(a), flags(f), name(n)
 {
 }
 
