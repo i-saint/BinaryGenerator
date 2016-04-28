@@ -29,10 +29,20 @@ SymbolTable&        Context::getSymbolTable() { return *m_sym; }
 StringTable&        Context::getStringTable() { return *m_str; }
 
 
+bool Context::writeCOFFx86(const char *path)
+{
+    std::fstream ofs(path, std::ios::binary | std::ios::out);
+    return writeCOFFx86(ofs);
+}
 bool Context::writeCOFFx86(std::ostream &os)
 {
     COFFWriter<Traits_x86> writer;
     return writer.write(*this, os);
+}
+bool Context::writeCOFFx86_64(const char *path)
+{
+    std::fstream ofs(path, std::ios::binary | std::ios::out);
+    return writeCOFFx86_64(ofs);
 }
 
 bool Context::writeCOFFx86_64(std::ostream &os)
@@ -41,11 +51,21 @@ bool Context::writeCOFFx86_64(std::ostream &os)
     return writer.write(*this, os);
 }
 
+bool Context::writeELFx86(const char *path)
+{
+    std::fstream ofs(path, std::ios::binary | std::ios::out);
+    return writeELFx86(ofs);
+}
 bool Context::writeELFx86(std::ostream &os)
 {
     return false;
 }
 
+bool Context::writeELFx86_64(const char *path)
+{
+    std::fstream ofs(path, std::ios::binary | std::ios::out);
+    return writeELFx86_64(ofs);
+}
 bool Context::writeELFx86_64(std::ostream &os)
 {
     return false;

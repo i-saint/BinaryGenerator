@@ -1,24 +1,25 @@
 #pragma once
 namespace bg {
 
-enum SectionType {
-    SectionType_None    = 0,
-    SectionType_Read    = 1 << 0,
-    SectionType_Write   = 1 << 1,
-    SectionType_Execute = 1 << 2,
-    SectionType_Shared  = 1 << 3,
-    SectionType_Code    = 1 << 4,
-    SectionType_IData   = 1 << 5,
-    SectionType_Udata   = 1 << 6,
-    SectionType_Info    = 1 << 7,
-    SectionType_Remove  = 1 << 8,
+enum SectionFlag {
+    SectionFlag_None    = 0,
+    SectionFlag_Read    = 1 << 0,
+    SectionFlag_Write   = 1 << 1,
+    SectionFlag_Execute = 1 << 2,
+    SectionFlag_Shared  = 1 << 3,
+    SectionFlag_Code    = 1 << 4,
+    SectionFlag_IData   = 1 << 5,
+    SectionFlag_Udata   = 1 << 6,
+    SectionFlag_Info    = 1 << 7,
+    SectionFlag_Remove  = 1 << 8,
 
-    SectionType_TextAttributes = SectionType_Read | SectionType_Write | SectionType_Execute | SectionType_Code,
-    SectionType_IDataAttributes = SectionType_Read | SectionType_IData,
-    SectionType_UDataAttributes = SectionType_Read | SectionType_Write | SectionType_Udata,
-    SectionType_InfoAttributes = SectionType_Info | SectionType_Remove,
+    SectionType_Text    = SectionFlag_Read | SectionFlag_Write | SectionFlag_Execute | SectionFlag_Code,
+    SectionType_IData   = SectionFlag_Read | SectionFlag_IData,
+    SectionType_UData   = SectionFlag_Read | SectionFlag_Write | SectionFlag_Udata,
+    SectionType_Info    = SectionFlag_Info | SectionFlag_Remove,
 };
-//IMAGE_SCN_LNK_INFO
+
+
 class Section
 {
 public:

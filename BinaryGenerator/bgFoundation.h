@@ -23,7 +23,7 @@
 
 namespace bg {
 
-enum SectionType;
+enum SectionFlag;
 enum SymbolType;
 enum RelocationType;
 

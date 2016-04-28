@@ -15,12 +15,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\BinaryGenerator.vcxproj">
       <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TestGenCOFF.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0453A6D4-2184-415A-8BD5-9C6C90A533D7}</ProjectGuid>

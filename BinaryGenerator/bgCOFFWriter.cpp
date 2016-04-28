@@ -14,21 +14,19 @@
 //--------------------------//
 // IMAGE_FILE_HEADER        //
 //--------------------------//
-//                          //
-// IMAGE_SECTION_HEADER x n //
-//                          //
+// IMAGE_SECTION_HEADER     //
+//  * num sections          //
 //--------------------------//
 //                          //
 //                          //
 //                          //
-// section data x n         //
+// section data             //
+//  * num sections          //
 //                          //
 //                          //
-// (relocation info)        //
 //--------------------------//
-//                          //
-// IMAGE_SYMBOL x n         //
-//                          //
+// IMAGE_SYMBOL             //
+//  * num symbols           //
 //--------------------------//
 // string table             //
 //--------------------------//
@@ -132,40 +130,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         sh.PointerToLinenumbers = 0;
         sh.NumberOfRelocations = (WORD)rels.size();
         sh.NumberOfLinenumbers = 0;
-
-        sh.Characteristics = 0;
-        uint32_t flags = section->getFlags();
-        if ((flags & SectionType_Code)) {
-            sh.Characteristics |= IMAGE_SCN_CNT_CODE;
-            sh.Characteristics |= IMAGE_SCN_ALIGN_16BYTES;
-        }
-        if ((flags & SectionType_IData)) {
-            sh.Characteristics |= IMAGE_SCN_CNT_INITIALIZED_DATA;
-            sh.Characteristics |= IMAGE_SCN_ALIGN_16BYTES;
-        }
-        if ((flags & SectionType_Udata)) {
-            sh.Characteristics |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
-            sh.Characteristics |= IMAGE_SCN_ALIGN_16BYTES;
-        }
-        if ((flags & SectionType_Info)) {
-            sh.Characteristics |= IMAGE_SCN_LNK_INFO;
-            sh.Characteristics |= IMAGE_SCN_ALIGN_1BYTES;
-        }
-        if ((flags & SectionType_Read)) {
-            sh.Characteristics |= IMAGE_SCN_MEM_READ;
-        }
-        if ((flags & SectionType_Write)) {
-            sh.Characteristics |= IMAGE_SCN_MEM_WRITE;
-        }
-        if ((flags & SectionType_Execute)) {
-            sh.Characteristics |= IMAGE_SCN_MEM_EXECUTE;
-        }
-        if ((flags & SectionType_Shared)) {
-            sh.Characteristics |= IMAGE_SCN_MEM_SHARED;
-        }
-        if ((flags & SectionType_Remove)) {
-            sh.Characteristics |= IMAGE_SCN_LNK_REMOVE;
-        }
+        sh.Characteristics = translateSectionFlags(section->getFlags());
 
         irels.resize(rels.size());
         for (size_t ri = 0; ri < rels.size(); ++ri) {
@@ -207,12 +172,50 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
 
     // string table
     {
-        auto len = (DWORD)strings.size() + sizeof(DWORD);
-        m_os->write((char*)&len, sizeof(DWORD));
+        DWORD len = (DWORD)strings.size() + sizeof(DWORD);
+        m_os->write((char*)&len, sizeof(len));
         m_os->write(strings.c_str(), strings.size());
     }
 
     return true;
+}
+
+template<class T>
+uint32_t COFFWriter<T>::translateSectionFlags(uint32_t flags)
+{
+    uint32_t r = 0;
+    if ((flags & SectionFlag_Code)) {
+        r |= IMAGE_SCN_CNT_CODE;
+        r |= IMAGE_SCN_ALIGN_16BYTES;
+    }
+    if ((flags & SectionFlag_IData)) {
+        r |= IMAGE_SCN_CNT_INITIALIZED_DATA;
+        r |= IMAGE_SCN_ALIGN_16BYTES;
+    }
+    if ((flags & SectionFlag_Udata)) {
+        r |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
+        r |= IMAGE_SCN_ALIGN_16BYTES;
+    }
+    if ((flags & SectionFlag_Info)) {
+        r |= IMAGE_SCN_LNK_INFO;
+        r |= IMAGE_SCN_ALIGN_1BYTES;
+    }
+    if ((flags & SectionFlag_Read)) {
+        r |= IMAGE_SCN_MEM_READ;
+    }
+    if ((flags & SectionFlag_Write)) {
+        r |= IMAGE_SCN_MEM_WRITE;
+    }
+    if ((flags & SectionFlag_Execute)) {
+        r |= IMAGE_SCN_MEM_EXECUTE;
+    }
+    if ((flags & SectionFlag_Shared)) {
+        r |= IMAGE_SCN_MEM_SHARED;
+    }
+    if ((flags & SectionFlag_Remove)) {
+        r |= IMAGE_SCN_LNK_REMOVE;
+    }
+    return r;
 }
 
 template class COFFWriter<Traits_x86>;
