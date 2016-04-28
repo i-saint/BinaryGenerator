@@ -284,6 +284,7 @@ typedef struct _IMAGE_SYMBOL {
 typedef IMAGE_SYMBOL UNALIGNED *PIMAGE_SYMBOL;
 
 
+#define IMAGE_SIZEOF_RELOCATION             10
 typedef struct _IMAGE_RELOCATION {
     union {
         DWORD   VirtualAddress;

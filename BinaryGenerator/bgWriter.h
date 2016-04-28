@@ -1,8 +1,6 @@
 #pragma once
 namespace bg {
 
-struct _IMAGE_RELOCATION;
-
 // Traits: Traits_x86, Traits_x64
 template<class Traits>
 class COFFWriter
@@ -18,6 +16,7 @@ protected:
     Context *m_ctx;
     std::ostream *m_os;
 };
+
 
 // Traits: Traits_x86, Traits_x64
 template<class Traits>

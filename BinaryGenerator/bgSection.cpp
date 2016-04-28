@@ -27,6 +27,14 @@ Symbol Section::addSymbol(const void *data_, size_t len, const char *name, uint3
     auto ret = Symbol(this, pos, m_ctx->getStringTable().addString(name), flags);
     return m_ctx->getSymbolTable().insert(ret);
 }
+Symbol Section::addStaticSymbol(const void *data, size_t len, const char *name)
+{
+    return addSymbol(data, len, name, SymbolFlag_Static);
+}
+Symbol Section::addExternalSymbol(const void *data, size_t len, const char *name)
+{
+    return addSymbol(data, len, name, SymbolFlag_External);
+}
 
 Symbol Section::addExternalSymbol(const char *name)
 {
@@ -34,12 +42,17 @@ Symbol Section::addExternalSymbol(const char *name)
     return m_ctx->getSymbolTable().insert(ret);
 }
 
-Relocation Section::addRelocation(uint32_t pos, const char *name, RelocationType type)
+Relocation Section::addRelocation(uint32_t pos, const char *sym_name, RelocationType type)
+{
+    return addRelocation(pos, addExternalSymbol(sym_name).index, type);
+}
+
+Relocation Section::addRelocation(uint32_t pos, uint32_t symbol_index, RelocationType type)
 {
     auto ret = Relocation();
     ret.section = this;
     ret.rva = pos;
-    ret.symbol_index = addExternalSymbol(name).index;
+    ret.symbol_index = symbol_index;
     ret.type = type;
     m_reloc.emplace_back(ret);
     return ret;

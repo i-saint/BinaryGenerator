@@ -29,8 +29,12 @@ public:
 public:
     Section(Context *ctx, const char *name, uint32_t index, uint32_t flags);
 
-    Symbol              addSymbol(const void *data, size_t len, const char *name, uint32_t flags = SymbolFlag_External);
-    Relocation          addRelocation(uint32_t pos, const char *name, RelocationType type);
+    Symbol              addSymbol(const void *data, size_t len, const char *name, uint32_t flags);
+    Symbol              addStaticSymbol(const void *data, size_t len, const char *name);
+    Symbol              addExternalSymbol(const void *data, size_t len, const char *name);
+
+    Relocation          addRelocation(uint32_t pos, const char *symbol_name, RelocationType type);
+    Relocation          addRelocation(uint32_t pos, uint32_t symbol_index, RelocationType type);
 
     const char*         getName() const;
     uint32_t            getIndex() const;

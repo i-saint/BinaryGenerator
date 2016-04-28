@@ -77,7 +77,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     DWORD pos_symbols = pos_sections;
     for (auto& s : sections) {
         pos_symbols += (DWORD)s->getData().size();
-        pos_symbols += (DWORD)(sizeof(IMAGE_RELOCATION) * s->getRelocations().size());
+        pos_symbols += (DWORD)(IMAGE_SIZEOF_RELOCATION * s->getRelocations().size());
     }
 
     coff_header.Machine = ImplT::Machine;
@@ -100,7 +100,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         isym.N.Name.Short = 0;
         isym.N.Name.Long = sym.name.rva;
         isym.Value = sym.rva;
-        isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : 0;
+        isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : IMAGE_SYM_UNDEFINED;
         isym.Type = IMAGE_SYM_TYPE_NULL;
         isym.StorageClass = IMAGE_SYM_CLASS_NULL;
         if ((sym.flags & SymbolFlag_Static)) {
@@ -142,7 +142,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         }
 
         pos_sections += sh.SizeOfRawData;
-        pos_sections += sizeof(IMAGE_RELOCATION) * sh.NumberOfRelocations;
+        pos_sections += IMAGE_SIZEOF_RELOCATION * sh.NumberOfRelocations;
     }
 
 
@@ -157,14 +157,16 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     }
 
     // section contents
-    for (auto& section : sections) {
+    for (size_t si = 0; si < sections.size(); ++si) {
+        auto& section = sections[si];
         auto& data = section->getData();
-        auto& rels = section->getRelocations();
         if (!data.empty()) {
             m_os->write(data.c_str(), data.size());
         }
-        if (!rels.empty()) {
-            m_os->write((char*)&rels[0], sizeof(IMAGE_RELOCATION) * rels.size());
+        if (!coff_rels.empty()) {
+            for (auto& r : coff_rels[si]) {
+                m_os->write((char*)&r, IMAGE_SIZEOF_RELOCATION);
+            }
         }
     }
 
