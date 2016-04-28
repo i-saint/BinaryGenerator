@@ -27,14 +27,16 @@
     <ClInclude Include="BinaryGenerator\bgFoundation.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="BinaryGenerator.h" />
     <ClInclude Include="BinaryGenerator\bgELF.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h" />
     <ClInclude Include="BinaryGenerator\bgWriter.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
+    <ClInclude Include="BinaryGenerator\pch.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinaryGenerator\bgContext.cpp">
@@ -55,8 +57,10 @@
     <ClCompile Include="BinaryGenerator\bgCOFFWriter.cpp">
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
-    <ClCompile Include="pch.cpp" />
     <ClCompile Include="BinaryGenerator\bgELFWriter.cpp">
+      <Filter>BinaryGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryGenerator\pch.cpp">
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
   </ItemGroup>

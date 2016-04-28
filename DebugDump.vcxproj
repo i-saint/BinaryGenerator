@@ -11,44 +11,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BinaryGenerator.h" />
-    <ClInclude Include="BinaryGenerator\bgCOFF.h" />
-    <ClInclude Include="BinaryGenerator\bgContext.h" />
-    <ClInclude Include="BinaryGenerator\bgELF.h" />
-    <ClInclude Include="BinaryGenerator\bgFoundation.h" />
-    <ClInclude Include="BinaryGenerator\bgRelocation.h" />
-    <ClInclude Include="BinaryGenerator\bgSection.h" />
-    <ClInclude Include="BinaryGenerator\bgString.h" />
-    <ClInclude Include="BinaryGenerator\bgSymbol.h" />
-    <ClInclude Include="BinaryGenerator\bgWriter.h" />
-    <ClInclude Include="BinaryGenerator\pch.h" />
+    <ClInclude Include="DebugDump\DebugDump.h" />
+    <ClInclude Include="DebugDump\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BinaryGenerator\bgCOFFWriter.cpp" />
-    <ClCompile Include="BinaryGenerator\bgContext.cpp" />
-    <ClCompile Include="BinaryGenerator\bgELFWriter.cpp" />
-    <ClCompile Include="BinaryGenerator\bgRelocation.cpp" />
-    <ClCompile Include="BinaryGenerator\bgSection.cpp" />
-    <ClCompile Include="BinaryGenerator\bgString.cpp" />
-    <ClCompile Include="BinaryGenerator\bgSymbol.cpp" />
-    <ClCompile Include="BinaryGenerator\pch.cpp">
+    <ClCompile Include="DebugDump\ddWindows.cpp" />
+    <ClCompile Include="DebugDump\DebugDump.cpp" />
+    <ClCompile Include="DebugDump\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{08361722-5520-47AC-A0C2-31E8A062B73F}</ProjectGuid>
+    <ProjectGuid>{215DCBDB-55FF-4B3E-A2BF-C9419939409F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformToolset>v140</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'" Label="Configuration">
     <PlatformToolset>v140</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -85,6 +71,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Project\OpenEXRExporter\Plugin\external\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <MapExports>true</MapExports>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|x64'">
@@ -97,7 +84,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zo %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>utjStaticLink;utjMaster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>utjMaster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)External\OpenToonzPluginAPI;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -112,6 +99,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <AdditionalLibraryDirectories>C:\Project\OpenEXRExporter\Plugin\external\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <MapExports>true</MapExports>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
