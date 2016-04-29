@@ -9,8 +9,8 @@ public:
     COFFWriter();
     bool write(Context& ctx, std::ostream& os);
 
-    uint32_t translateSectionFlags(uint32_t flags);
-    uint32_t translateRelocationType(RelocationType rel);
+    uint32 translateSectionFlags(uint32 flags);
+    uint32 translateRelocationType(RelocationType rel);
 
 protected:
     Context *m_ctx;

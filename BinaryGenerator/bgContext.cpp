@@ -1,13 +1,18 @@
 #include "pch.h"
-#include "bgFoundation.h"
-#include "bgContext.h"
-#include "bgString.h"
-#include "bgSymbol.h"
-#include "bgRelocation.h"
-#include "bgSection.h"
+#include "bgInternal.h"
 #include "bgWriter.h"
 
 namespace bg {
+
+IContext::~IContext()
+{
+}
+
+bgAPI IContext* CreateContext()
+{
+    return new Context();
+}
+
 
 Context::Context()
     : m_sym(new SymbolTable(this))
@@ -15,11 +20,20 @@ Context::Context()
 {
 }
 
+Context::~Context()
+{
+}
+
+void Context::release()
+{
+    delete this;
+}
+
 size_t Context::getNumSections() const { return m_sections.size(); }
 Section* Context::getSection(size_t i) { return m_sections[i].get(); }
-Section* Context::createSection(const char *name, uint32_t flags)
+Section* Context::createSection(const char *name, uint32 flags)
 {
-    auto *s = new Section(this, name, (uint32_t)m_sections.size(), flags);
+    auto *s = new Section(this, name, (uint32)m_sections.size(), flags);
     m_sections.emplace_back(SectionPtr(s));
     return s;
 }

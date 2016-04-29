@@ -1,14 +1,14 @@
 #include "pch.h"
-#include "bgFoundation.h"
-#include "bgContext.h"
-#include "bgString.h"
-#include "bgSymbol.h"
-#include "bgRelocation.h"
-#include "bgSection.h"
+#include "bgInternal.h"
 
 namespace bg {
 
-Section::Section(Context *ctx, const char *name, uint32_t index, uint32_t flags)
+ISection::~ISection()
+{
+}
+
+
+Section::Section(Context *ctx, const char *name, uint32 index, uint32 flags)
     : m_ctx(ctx)
     , m_index(index)
     , m_flags(flags)
@@ -18,36 +18,50 @@ Section::Section(Context *ctx, const char *name, uint32_t index, uint32_t flags)
 
 }
 
-uint32_t Section::addData(const void *data, size_t len)
+Section::~Section()
 {
-    auto pos = (uint32_t)m_data.size();
+}
+
+uint32 Section::addData(const void *data, uint32 len)
+{
+    auto pos = (uint32)m_data.size();
     m_data.insert(m_data.end(), (char*)data, (char*)data + len);
     return pos;
 }
 
-Symbol Section::addSymbol(const void *data, size_t len, const char *name, uint32_t flags)
+Symbol Section::addSymbol(const void *data, uint32 len, const char *name, uint32 flags)
 {
     return addSymbol(addData(data, len), name, flags);
 }
 
-Symbol Section::addSymbol(uint32_t pos, const char *name, uint32_t flags)
+Symbol Section::addSymbol(uint32 addr, const char *name, uint32 flags)
 {
-    auto ret = Symbol(this, pos, m_ctx->getStringTable().addString(name), flags);
+    auto ret = Symbol();
+    ret.section = this;
+    ret.index = 0;
+    ret.addr = addr;
+    ret.flags = flags;
+    ret.name = m_ctx->getStringTable().addString(name);
     return m_ctx->getSymbolTable().addSymbol(ret);
 }
 
 Symbol Section::addUndefinedSymbol(const char *name)
 {
-    auto ret = Symbol(nullptr, 0, m_ctx->getStringTable().addString(name));
+    auto ret = Symbol();
+    ret.section = nullptr;
+    ret.index = 0;
+    ret.addr = 0;
+    ret.flags = 0;
+    ret.name = m_ctx->getStringTable().addString(name);
     return m_ctx->getSymbolTable().addSymbol(ret);
 }
 
-Relocation Section::addRelocation(uint32_t pos, const char *sym_name, RelocationType type)
+Relocation Section::addRelocation(uint32 pos, const char *sym_name, RelocationType type)
 {
     return addRelocation(pos, addUndefinedSymbol(sym_name).index, type);
 }
 
-Relocation Section::addRelocation(uint32_t pos, uint32_t symbol_index, RelocationType type)
+Relocation Section::addRelocation(uint32 pos, uint32 symbol_index, RelocationType type)
 {
     auto ret = Relocation();
     ret.section = this;
@@ -59,9 +73,9 @@ Relocation Section::addRelocation(uint32_t pos, uint32_t symbol_index, Relocatio
 }
 
 const char* Section::getName() const { return m_name; }
-uint32_t Section::getIndex() const { return m_index; }
-uint32_t Section::getFlags() const { return m_flags; }
-uint32_t Section::getSize() const { return (uint32_t)m_data.size(); }
+uint32 Section::getIndex() const { return m_index; }
+uint32 Section::getFlags() const { return m_flags; }
+uint32 Section::getSize() const { return (uint32)m_data.size(); }
 char* Section::getData() { return m_data.empty() ? nullptr : &m_data[0]; }
 Section::Relocations& Section::getRelocations() { return m_reloc; }
 

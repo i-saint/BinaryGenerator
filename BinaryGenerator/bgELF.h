@@ -4,18 +4,18 @@
 namespace bg {
 
 typedef uint16_t Elf32_Half;
-typedef uint32_t Elf32_Word;
+typedef uint32 Elf32_Word;
 typedef int32_t  Elf32_Sword;
 typedef uint64_t Elf32_Xword;
 typedef int64_t  Elf32_Sxword;
-typedef uint32_t Elf32_Addr;
-typedef uint32_t Elf32_Off;
+typedef uint32 Elf32_Addr;
+typedef uint32 Elf32_Off;
 typedef uint16_t Elf32_Section;
-typedef uint32_t Elf32_Symndx;
+typedef uint32 Elf32_Symndx;
 typedef unsigned char Elf32_Byte;
 
 typedef uint16_t Elf64_Half;
-typedef uint32_t Elf64_Word;
+typedef uint32 Elf64_Word;
 typedef int32_t  Elf64_Sword;
 typedef uint64_t Elf64_Xword;
 typedef int64_t  Elf64_Sxword;

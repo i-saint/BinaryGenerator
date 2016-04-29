@@ -1,20 +1,7 @@
 #include "pch.h"
-#include "bgFoundation.h"
-#include "bgContext.h"
-#include "bgString.h"
-#include "bgSymbol.h"
+#include "bgInternal.h"
 
 namespace bg {
-
-Symbol::Symbol()
-    : section(), index(), addr(), flags(), name()
-{
-}
-
-Symbol::Symbol(Section *s, uint32_t a, const String& n, uint32_t f)
-    : section(s), index(), addr(a), flags(f), name(n)
-{
-}
 
 SymbolTable::SymbolTable(Context *ctx)
     : m_ctx(ctx)
@@ -33,7 +20,7 @@ Symbol& SymbolTable::addSymbol(const Symbol& sym)
     }
 
     m_symbols.emplace_back(sym);
-    m_symbols.back().index = (uint32_t)m_symbols.size() - 1;
+    m_symbols.back().index = (uint32)m_symbols.size() - 1;
     return m_symbols.back();
 }
 

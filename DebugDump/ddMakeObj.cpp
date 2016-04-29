@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "DebugDump.h"
+#define bgStaticLink
 #include "../BinaryGenerator.h"
+
 namespace dd {
 
 static std::string MakeExportDirective(Symbols& syms)
@@ -25,9 +27,9 @@ static void WriteObj_COFF_x86(std::ostream& os, Symbols& syms)
         jumptable[i] = syms[i].addr;
     }
 
-    bg::Context ctx;
-    bg::Section *directive = ctx.createSection(".drectve", bg::SectionType_Info);
-    bg::Section *text = ctx.createSection(".textx", bg::SectionType_TextX);
+    bg::IContext *ctx = bg::CreateContext();
+    bg::ISection *directive = ctx->createSection(".drectve", bg::SectionType_Info);
+    bg::ISection *text = ctx->createSection(".textx", bg::SectionType_TextX);
 
     uint32 code_len = 6 * num_syms;
     uint8 code[6] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
@@ -41,7 +43,8 @@ static void WriteObj_COFF_x86(std::ostream& os, Symbols& syms)
     auto exports = MakeExportDirective(syms);
     directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
-    ctx.write(os, bg::Format_COFF_x86);
+    ctx->write(os, bg::Format_COFF_x86);
+    ctx->release();
 }
 
 static void WriteObj_COFF_x86_64(std::ostream& os, Symbols& syms)
@@ -55,9 +58,9 @@ static void WriteObj_COFF_x86_64(std::ostream& os, Symbols& syms)
         jumptable[i] = syms[i].addr;
     }
 
-    bg::Context ctx;
-    bg::Section *directive = ctx.createSection(".drectve", bg::SectionType_Info);
-    bg::Section *text = ctx.createSection(".textx", bg::SectionType_TextX);
+    bg::IContext *ctx = bg::CreateContext();
+    bg::ISection *directive = ctx->createSection(".drectve", bg::SectionType_Info);
+    bg::ISection *text = ctx->createSection(".textx", bg::SectionType_TextX);
 
     uint32 code_len = 6 * num_syms;
     uint8 code[6] = {0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
@@ -74,7 +77,8 @@ static void WriteObj_COFF_x86_64(std::ostream& os, Symbols& syms)
     auto exports = MakeExportDirective(syms);
     directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
-    ctx.write(os, bg::Format_COFF_x64);
+    ctx->write(os, bg::Format_COFF_x64);
+    ctx->release();
 }
 
 void WriteObj(std::ostream& os, Symbols& syms, bg::Format fmt)

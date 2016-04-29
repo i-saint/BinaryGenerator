@@ -23,8 +23,7 @@
     <ClInclude Include="BinaryGenerator\bgCOFF.h" />
     <ClInclude Include="BinaryGenerator\bgContext.h" />
     <ClInclude Include="BinaryGenerator\bgELF.h" />
-    <ClInclude Include="BinaryGenerator\bgFoundation.h" />
-    <ClInclude Include="BinaryGenerator\bgRelocation.h" />
+    <ClInclude Include="BinaryGenerator\bgInternal.h" />
     <ClInclude Include="BinaryGenerator\bgSection.h" />
     <ClInclude Include="BinaryGenerator\bgString.h" />
     <ClInclude Include="BinaryGenerator\bgSymbol.h" />
@@ -35,7 +34,6 @@
     <ClCompile Include="BinaryGenerator\bgCOFFWriter.cpp" />
     <ClCompile Include="BinaryGenerator\bgContext.cpp" />
     <ClCompile Include="BinaryGenerator\bgELFWriter.cpp" />
-    <ClCompile Include="BinaryGenerator\bgRelocation.cpp" />
     <ClCompile Include="BinaryGenerator\bgSection.cpp" />
     <ClCompile Include="BinaryGenerator\bgString.cpp" />
     <ClCompile Include="BinaryGenerator\bgSymbol.cpp" />
@@ -89,7 +87,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>utjDebug;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>bgImpl;bgStaticLink;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -111,6 +109,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
+      <PreprocessorDefinitions>bgImpl;bgStaticLink;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -124,6 +123,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>bgImpl;bgStaticLink;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Master|Win32'">
@@ -136,6 +136,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>bgImpl;bgStaticLink;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

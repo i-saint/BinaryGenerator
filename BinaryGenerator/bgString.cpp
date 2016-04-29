@@ -1,20 +1,11 @@
 #include "pch.h"
-#include "bgFoundation.h"
-#include "bgContext.h"
-#include "bgString.h"
+#include "bgInternal.h"
 
 namespace bg {
 
-String::String() : table(), rva()
-{}
-
-String::String(StringTable& t, uint32_t a)
-    : table(&t), rva(a)
-{}
-
 const char* String::str() const
 {
-    return table == nullptr ? nullptr : table->get(rva);
+    return table == nullptr ? nullptr : table->get(addr);
 }
 
 bool operator==(const String&a, const String& b)
@@ -44,14 +35,16 @@ const String& StringTable::addString(const char *str)
         return i->second;
     }
     else {
-        auto pos = (uint32_t)m_table.size() + 4;
+        auto addr = (uint32)m_table.size() + 4;
         m_table.insert(m_table.end(), str, str + strlen(str) + 1);
-        auto e = m_entries.insert(std::make_pair(str, String(*this, pos)));
+
+        String tmp = {this, addr};
+        auto e = m_entries.insert(std::make_pair(str, tmp));
         return e.first->second;
     }
 }
 
-const char* StringTable::get(uint32_t i)
+const char* StringTable::get(uint32 i)
 {
     return &m_table[i];
 }

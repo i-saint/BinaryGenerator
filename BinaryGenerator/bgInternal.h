@@ -1,0 +1,25 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include <map>
+#include <memory>
+
+namespace bg {
+
+class Context;
+class Section;
+class SymbolTable;
+class StringTable;
+
+class Traits_x86;
+class Traits_x64;
+class Traits_ARM;
+
+} // namespace bg
+
+#include "../BinaryGenerator.h"
+#include "bgString.h"
+#include "bgSymbol.h"
+#include "bgSection.h"
+#include "bgContext.h"

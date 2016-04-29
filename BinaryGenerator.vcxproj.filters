@@ -12,9 +12,6 @@
     <ClInclude Include="BinaryGenerator\bgContext.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="BinaryGenerator\bgRelocation.h">
-      <Filter>BinaryGenerator</Filter>
-    </ClInclude>
     <ClInclude Include="BinaryGenerator\bgSection.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
@@ -22,9 +19,6 @@
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
     <ClInclude Include="BinaryGenerator\bgSymbol.h">
-      <Filter>BinaryGenerator</Filter>
-    </ClInclude>
-    <ClInclude Include="BinaryGenerator\bgFoundation.h">
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
     <ClInclude Include="BinaryGenerator\bgELF.h">
@@ -37,12 +31,12 @@
       <Filter>BinaryGenerator</Filter>
     </ClInclude>
     <ClInclude Include="BinaryGenerator.h" />
+    <ClInclude Include="BinaryGenerator\bgInternal.h">
+      <Filter>BinaryGenerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinaryGenerator\bgContext.cpp">
-      <Filter>BinaryGenerator</Filter>
-    </ClCompile>
-    <ClCompile Include="BinaryGenerator\bgRelocation.cpp">
       <Filter>BinaryGenerator</Filter>
     </ClCompile>
     <ClCompile Include="BinaryGenerator\bgSection.cpp">

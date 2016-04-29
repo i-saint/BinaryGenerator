@@ -1,12 +1,7 @@
 #include "pch.h"
-#include "bgFoundation.h"
-#include "bgContext.h"
-#include "bgString.h"
-#include "bgSymbol.h"
-#include "bgRelocation.h"
-#include "bgSection.h"
-#include "bgCOFF.h"
+#include "bgInternal.h"
 #include "bgWriter.h"
+#include "bgCOFF.h"
 
 
 // structure of COFF file
@@ -98,7 +93,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         auto& isym = coff_syms[si];
 
         isym.N.Name.Short = 0;
-        isym.N.Name.Long = sym.name.rva;
+        isym.N.Name.Long = sym.name.addr;
         isym.Value = sym.addr;
         isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : IMAGE_SYM_UNDEFINED;
         isym.Type = IMAGE_SYM_TYPE_NULL;
@@ -185,9 +180,9 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
 }
 
 template<class T>
-uint32_t COFFWriter<T>::translateSectionFlags(uint32_t flags)
+uint32 COFFWriter<T>::translateSectionFlags(uint32 flags)
 {
-    uint32_t r = 0;
+    uint32 r = 0;
     if ((flags & SectionFlag_Code)) {
         r |= IMAGE_SCN_CNT_CODE;
         r |= IMAGE_SCN_ALIGN_16BYTES;
@@ -223,7 +218,7 @@ uint32_t COFFWriter<T>::translateSectionFlags(uint32_t flags)
 }
 
 template<>
-uint32_t COFFWriter<Traits_x86>::translateRelocationType(RelocationType rel)
+uint32 COFFWriter<Traits_x86>::translateRelocationType(RelocationType rel)
 {
     switch (rel) {
     case RelocationType_ABS: return IMAGE_REL_I386_ABSOLUTE;
@@ -236,7 +231,7 @@ uint32_t COFFWriter<Traits_x86>::translateRelocationType(RelocationType rel)
 }
 
 template<>
-uint32_t COFFWriter<Traits_x64>::translateRelocationType(RelocationType rel)
+uint32 COFFWriter<Traits_x64>::translateRelocationType(RelocationType rel)
 {
     switch (rel) {
     case RelocationType_ABS: return IMAGE_REL_AMD64_ABSOLUTE;
