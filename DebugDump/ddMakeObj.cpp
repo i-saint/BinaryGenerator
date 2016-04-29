@@ -3,25 +3,78 @@
 #include "../BinaryGenerator.h"
 namespace dd {
 
+static std::string MakeExportDirective(Symbols& syms)
+{
+    std::string ret;
+    char buf[2048];
+    for (auto& s : syms) {
+        sprintf(buf, "/EXPORT:%s ", s.name.c_str());
+        ret += buf;
+    }
+    return ret;
+}
+
 static void WriteObj_COFF_x86(std::ostream& os, Symbols& syms)
 {
+    typedef uint32 intptr;
+
+    uint32 num_syms = (uint32)syms.size();
+    std::vector<intptr> jumptable;
+    jumptable.resize(num_syms);
+    for (size_t i = 0; i < num_syms; ++i) {
+        jumptable[i] = syms[i].addr;
+    }
+
     bg::Context ctx;
+    bg::Section *directive = ctx.createSection(".drectve", bg::SectionType_Info);
+    bg::Section *text = ctx.createSection(".textx", bg::SectionType_TextX);
+
+    uint32 code_len = 6 * num_syms;
+    uint8 code[6] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
+    for (auto& sym : syms) {
+        text->addExternalSymbol(code, sizeof(code), sym.name.c_str());
+    }
+    text->addExternalSymbol(0, "_g_jumptable");
+    text->addExternalSymbol(&jumptable[0], jumptable.size() * sizeof(intptr), "_g_addrtable");
+    text->addExternalSymbol(&num_syms, sizeof(num_syms), "_g_num_symbols");
+
+    auto exports = MakeExportDirective(syms);
+    directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
     ctx.write(os, bg::Format_COFF_x86);
 }
 
 static void WriteObj_COFF_x86_64(std::ostream& os, Symbols& syms)
 {
-    std::vector<uint64> jumptable;
-    jumptable.resize(syms.size());
+    typedef uint64 intptr;
+
+    uint32 num_syms = (uint32)syms.size();
+    std::vector<intptr> jumptable;
+    jumptable.resize(num_syms);
+    for (size_t i = 0; i < num_syms; ++i) {
+        jumptable[i] = syms[i].addr;
+    }
 
     bg::Context ctx;
-    bg::Section *section = ctx.createSection(".textx", bg::SectionType_TextX);
-    uint8 code[14] = {0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    for (auto& sym : syms) {
-        section->addExternalSymbol(code, sizeof(code), sym.name.c_str());
+    bg::Section *directive = ctx.createSection(".drectve", bg::SectionType_Info);
+    bg::Section *text = ctx.createSection(".textx", bg::SectionType_TextX);
+
+    uint32 code_len = 6 * num_syms;
+    uint8 code[6] = {0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
+    for (size_t si = 0; si < syms.size(); ++si) {
+        auto& sym = syms[si];
+        bg::Symbol s = text->addExternalSymbol(code, sizeof(code), sym.name.c_str());
+        uint32 *offset = (uint32*)(text->getData() + s.addr + 2);
+        *offset = (uint32)(code_len - (si + 1) * 6 + sizeof(intptr) * si);
     }
-    ctx.write(os, bg::Format_COFF_x86);
+    text->addExternalSymbol(0, "g_jumptable");
+    text->addExternalSymbol(&jumptable[0], jumptable.size() * sizeof(intptr), "g_addrtable");
+    text->addExternalSymbol(&num_syms, sizeof(num_syms), "g_num_symbols");
+
+    auto exports = MakeExportDirective(syms);
+    directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
+
+    ctx.write(os, bg::Format_COFF_x64);
 }
 
 void WriteObj(std::ostream& os, Symbols& syms, bg::Format fmt)

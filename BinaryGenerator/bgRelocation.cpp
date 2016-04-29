@@ -9,7 +9,7 @@ namespace bg {
 
 Relocation::Relocation()
     : section()
-    , rva()
+    , addr()
     , symbol_index()
     , type()
 {

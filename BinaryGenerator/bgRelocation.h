@@ -16,7 +16,7 @@ public:
     Relocation();
 
     Section *section;
-    uint32_t rva;
+    uint32_t addr;
     uint32_t symbol_index;
     RelocationType type;
 };

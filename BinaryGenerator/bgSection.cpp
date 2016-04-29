@@ -33,25 +33,25 @@ Symbol Section::addSymbol(const void *data, size_t len, const char *name, uint32
 Symbol Section::addSymbol(uint32_t pos, const char *name, uint32_t flags)
 {
     auto ret = Symbol(this, pos, m_ctx->getStringTable().addString(name), flags);
-    return m_ctx->getSymbolTable().insert(ret);
+    return m_ctx->getSymbolTable().addSymbol(ret);
 }
 
-Symbol Section::addExternalSymbol(const char *name)
+Symbol Section::addUndefinedSymbol(const char *name)
 {
     auto ret = Symbol(nullptr, 0, m_ctx->getStringTable().addString(name));
-    return m_ctx->getSymbolTable().insert(ret);
+    return m_ctx->getSymbolTable().addSymbol(ret);
 }
 
 Relocation Section::addRelocation(uint32_t pos, const char *sym_name, RelocationType type)
 {
-    return addRelocation(pos, addExternalSymbol(sym_name).index, type);
+    return addRelocation(pos, addUndefinedSymbol(sym_name).index, type);
 }
 
 Relocation Section::addRelocation(uint32_t pos, uint32_t symbol_index, RelocationType type)
 {
     auto ret = Relocation();
     ret.section = this;
-    ret.rva = pos;
+    ret.addr = pos;
     ret.symbol_index = symbol_index;
     ret.type = type;
     m_reloc.emplace_back(ret);

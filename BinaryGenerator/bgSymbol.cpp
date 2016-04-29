@@ -7,12 +7,12 @@
 namespace bg {
 
 Symbol::Symbol()
-    : section(), index(), rva(), flags(), name()
+    : section(), index(), addr(), flags(), name()
 {
 }
 
 Symbol::Symbol(Section *s, uint32_t a, const String& n, uint32_t f)
-    : section(s), index(), rva(a), flags(f), name(n)
+    : section(s), index(), addr(a), flags(f), name(n)
 {
 }
 
@@ -26,12 +26,10 @@ SymbolTable::Symbols& SymbolTable::getSymbols()
     return m_symbols;
 }
 
-Symbol& SymbolTable::insert(const Symbol& sym)
+Symbol& SymbolTable::addSymbol(const Symbol& sym)
 {
-    for (auto& s : m_symbols) {
-        if (s.name == sym.name) {
-            return s;
-        }
+    if (Symbol *i = findSymbol(sym.name.str())) {
+        return *i;
     }
 
     m_symbols.emplace_back(sym);
@@ -39,9 +37,20 @@ Symbol& SymbolTable::insert(const Symbol& sym)
     return m_symbols.back();
 }
 
-Symbol& SymbolTable::get(size_t i)
+Symbol* SymbolTable::getSymbol(size_t i)
 {
-    return m_symbols[i];
+    if (i > m_symbols.size()) { return nullptr; }
+    return &m_symbols[i];
+}
+
+Symbol* SymbolTable::findSymbol(const char *name)
+{
+    for (auto& s : m_symbols) {
+        if (s.name == name) {
+            return &s;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace bg

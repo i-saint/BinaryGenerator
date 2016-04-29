@@ -12,6 +12,7 @@ public:
     uint32_t     rva;
 };
 bool operator==(const String&a, const String& b);
+bool operator==(const String&a, const char* b);
 bool operator<(const String&a, const String& b);
 
 class StringTable

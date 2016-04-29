@@ -15,7 +15,7 @@ public:
 
     Section     *section;
     uint32_t    index;
-    uint32_t    rva;
+    uint32_t    addr;
     uint32_t    flags; // combination of SymbolFlags
     String      name;
 };
@@ -28,8 +28,9 @@ public:
 public:
     SymbolTable(Context *ctx);
     Symbols& getSymbols();
-    Symbol& insert(const Symbol& sym);
-    Symbol& get(size_t i);
+    Symbol& addSymbol(const Symbol& sym);
+    Symbol* getSymbol(size_t i);
+    Symbol* findSymbol(const char *name);
 
 private:
     Context *m_ctx;

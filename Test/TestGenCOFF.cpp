@@ -23,8 +23,8 @@ void Generate_PutMessage_COFF_x64()
     bg::Section *text = ctx.createSection(".text", bg::SectionType_Text);
     bg::Symbol sym_str  = text->addStaticSymbol(string, sizeof(string), "$hello");
     bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), "PutMessage");
-    text->addRelocation(sym_code.rva + 3, "$hello", bg::RelocationType_REL32);
-    text->addRelocation(sym_code.rva + 8, "puts", bg::RelocationType_REL32);
+    text->addRelocation(sym_code.addr + 3, "$hello", bg::RelocationType_REL32);
+    text->addRelocation(sym_code.addr + 8, "puts", bg::RelocationType_REL32);
 
     // option: dllexport PutMessage()
     bg::Section *directive = ctx.createSection(".drectve", bg::SectionType_Info);

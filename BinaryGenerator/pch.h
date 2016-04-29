@@ -6,6 +6,7 @@
 #include <set>
 #include <functional>
 #include <memory>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <cstdio>

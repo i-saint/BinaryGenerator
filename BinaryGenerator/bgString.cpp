@@ -21,6 +21,10 @@ bool operator==(const String&a, const String& b)
 {
     return std::strcmp(a.str(), b.str()) == 0;
 }
+bool operator==(const String&a, const char* b)
+{
+    return std::strcmp(a.str(), b) == 0;
+}
 bool operator<(const String&a, const String& b)
 {
     return std::strcmp(a.str(), b.str()) < 0;

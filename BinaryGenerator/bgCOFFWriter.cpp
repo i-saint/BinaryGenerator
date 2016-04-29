@@ -99,7 +99,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
 
         isym.N.Name.Short = 0;
         isym.N.Name.Long = sym.name.rva;
-        isym.Value = sym.rva;
+        isym.Value = sym.addr;
         isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : IMAGE_SYM_UNDEFINED;
         isym.Type = IMAGE_SYM_TYPE_NULL;
         isym.StorageClass = IMAGE_SYM_CLASS_NULL;
@@ -136,7 +136,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
         for (size_t ri = 0; ri < rels.size(); ++ri) {
             auto& rel = rels[ri];
             auto& coff = irels[ri];
-            coff.DUMMYUNIONNAME.VirtualAddress = rel.rva;
+            coff.DUMMYUNIONNAME.VirtualAddress = rel.addr;
             coff.SymbolTableIndex = rel.symbol_index;
             coff.Type = translateRelocationType(rel.type);
         }

@@ -35,8 +35,8 @@ public:
     Symbol addSymbol(const void *data, size_t len, const char *name, uint32_t flags);
     // add symbol only
     Symbol addSymbol(uint32_t pos, const char *name, uint32_t flags);
-    // add ext symbol
-    Symbol addExternalSymbol(const char *name);
+    // add undef symbol
+    Symbol addUndefinedSymbol(const char *name);
 
     // utilities
     Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_Static); }
