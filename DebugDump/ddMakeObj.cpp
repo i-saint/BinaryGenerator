@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "DebugDump.h"
-#define bgStaticLink
 #include "../BinaryGenerator.h"
 
 namespace dd {
@@ -16,7 +15,7 @@ static std::string MakeExportDirective(Symbols& syms)
     return ret;
 }
 
-static void WriteObj_COFF_x86(std::ostream& os, Symbols& syms)
+static void WriteObj_COFF_x86(bg::IOutputStream& os, Symbols& syms)
 {
     typedef uint32 intptr;
 
@@ -47,7 +46,7 @@ static void WriteObj_COFF_x86(std::ostream& os, Symbols& syms)
     ctx->release();
 }
 
-static void WriteObj_COFF_x86_64(std::ostream& os, Symbols& syms)
+static void WriteObj_COFF_x86_64(bg::IOutputStream& os, Symbols& syms)
 {
     typedef uint64 intptr;
 
@@ -81,7 +80,7 @@ static void WriteObj_COFF_x86_64(std::ostream& os, Symbols& syms)
     ctx->release();
 }
 
-void WriteObj(std::ostream& os, Symbols& syms, bg::Format fmt)
+void WriteObj(bg::IOutputStream& os, Symbols& syms, bg::Format fmt)
 {
     switch (fmt) {
     case bg::Format_COFF_x86:

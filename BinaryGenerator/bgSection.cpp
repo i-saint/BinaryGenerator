@@ -3,11 +3,6 @@
 
 namespace bg {
 
-ISection::~ISection()
-{
-}
-
-
 Section::Section(Context *ctx, const char *name, uint32 index, uint32 flags)
     : m_ctx(ctx)
     , m_index(index)
@@ -22,14 +17,14 @@ Section::~Section()
 {
 }
 
-uint32 Section::addData(const void *data, uint32 len)
+uint32 Section::addData(const void *data, size_t len)
 {
     auto pos = (uint32)m_data.size();
     m_data.insert(m_data.end(), (char*)data, (char*)data + len);
     return pos;
 }
 
-Symbol Section::addSymbol(const void *data, uint32 len, const char *name, uint32 flags)
+Symbol Section::addSymbol(const void *data, size_t len, const char *name, uint32 flags)
 {
     return addSymbol(addData(data, len), name, flags);
 }
@@ -51,7 +46,7 @@ Symbol Section::addUndefinedSymbol(const char *name)
     ret.section = nullptr;
     ret.index = 0;
     ret.addr = 0;
-    ret.flags = 0;
+    ret.flags = SymbolFlag_External;
     ret.name = m_ctx->getStringTable().addString(name);
     return m_ctx->getSymbolTable().addSymbol(ret);
 }

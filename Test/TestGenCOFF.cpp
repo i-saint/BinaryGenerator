@@ -1,4 +1,3 @@
-#define bgStaticLink
 #include "../BinaryGenerator.h"
 
 void Generate_SayHello_COFF_x86()

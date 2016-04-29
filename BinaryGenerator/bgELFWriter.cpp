@@ -43,7 +43,7 @@ struct ELFImpl<Traits_x64>
 };
 
 template<class T>
-bool ELFWriter<T>::write(Context& ctx, std::ostream& os)
+bool ELFWriter<T>::write(Context& ctx, IOutputStream& os)
 {
     typedef ELFImpl<T> Impl;
 

@@ -50,7 +50,7 @@ struct COFFImpl<Traits_x64>
 };
 
 template<class T>
-bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
+bool COFFWriter<T>::write(Context& ctx, IOutputStream& os)
 {
     typedef COFFImpl<T> ImplT;
 

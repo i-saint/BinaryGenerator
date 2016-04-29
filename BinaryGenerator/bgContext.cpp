@@ -4,15 +4,21 @@
 
 namespace bg {
 
-IContext::~IContext()
-{
-}
-
 bgAPI IContext* CreateContext()
 {
     return new Context();
 }
 
+class StdOutputStream : public IOutputStream
+{
+public:
+    StdOutputStream(std::ostream& os) : m_os(os) {}
+    ~StdOutputStream() override {}
+    void write(const void *data, size_t len) override {
+        m_os.write((const char*)data, len);
+    }
+    std::ostream& m_os;
+};
 
 Context::Context()
     : m_sym(new SymbolTable(this))
@@ -46,10 +52,11 @@ StringTable&        Context::getStringTable() { return *m_str; }
 bool Context::write(const char *path, Format fmt)
 {
     std::fstream ofs(path, std::ios::binary | std::ios::out);
-    return write(ofs, fmt);
+    StdOutputStream s(ofs);
+    return write(s, fmt);
 }
 
-bool Context::write(std::ostream &os, Format fmt)
+bool Context::write(IOutputStream &os, Format fmt)
 {
     switch (fmt) {
     case Format_COFF_x86:

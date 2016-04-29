@@ -14,7 +14,7 @@ public:
     Section*        createSection(const char *name, uint32 flags) override;
 
     bool            write(const char *path, Format fmt) override;
-    bool            write(std::ostream &os, Format fmt) override;
+    bool            write(IOutputStream &os, Format fmt) override;
 
 public:
     typedef std::unique_ptr<Section>            SectionPtr;

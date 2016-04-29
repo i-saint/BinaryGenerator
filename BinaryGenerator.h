@@ -1,5 +1,4 @@
 #pragma once
-#pragma comment(lib, "BinaryGenerator.lib")
 
 #define bgCLinkage extern "C"
 #ifdef _WIN32
@@ -8,15 +7,18 @@
             #define bgAPI __declspec(dllexport)
         #else
             #define bgAPI __declspec(dllimport)
+            #pragma comment(lib, "BinaryGenerator.lib")
         #endif
     #else
         #define bgAPI
+        #ifdef bgImpl
+        #else
+            #pragma comment(lib, "BinaryGenerator_s.lib")
+        #endif
     #endif
 #else
     #define bgAPI
 #endif
-
-#include <iostream>
 
 namespace bg {
     
@@ -25,6 +27,7 @@ typedef unsigned short      uint16;
 typedef unsigned int        uint32;
 typedef unsigned long long  uint64;
 
+class IOutputStream;
 class IContext;
 class ISection;
 class StringTable;
@@ -97,40 +100,52 @@ struct Relocation
 };
 
 
+// make derived class and pass it to IContext::write() if you want to customize output
+class IOutputStream
+{
+public:
+    virtual ~IOutputStream() {}
+    virtual void write(const void *data, size_t len) = 0;
+};
+
+
 class IContext
 {
 public:
-    virtual ~IContext();
+    virtual ~IContext() {}
     virtual void        release() = 0;
+
     virtual size_t      getNumSections() const = 0;
     virtual ISection*   getSection(size_t i) = 0;
     // flags: combination of SectionType
     virtual ISection*   createSection(const char *name, uint32 flags) = 0;
 
     virtual bool write(const char *path, Format fmt) = 0;
-    virtual bool write(std::ostream &os, Format fmt) = 0;
+    virtual bool write(IOutputStream &os, Format fmt) = 0;
 };
+
 
 class ISection
 {
 public:
-    virtual ~ISection();
+    virtual ~ISection() {}
 
     // add data and return position of added data
-    virtual uint32 addData(const void *data, uint32 len) = 0;
+    virtual uint32 addData(const void *data, size_t len) = 0;
     // add data and symbol
-    virtual Symbol addSymbol(const void *data, uint32 len, const char *name, uint32 flags) = 0;
+    virtual Symbol addSymbol(const void *data, size_t len, const char *name, uint32 flags) = 0;
     // add symbol only
     virtual Symbol addSymbol(uint32 pos, const char *name, uint32 flags) = 0;
     // add undef symbol
     virtual Symbol addUndefinedSymbol(const char *name) = 0;
 
     // utilities
-    Symbol addStaticSymbol(const void *data, uint32 len, const char *name) { return addSymbol(data, len, name, SymbolFlag_Static); }
-    Symbol addExternalSymbol(const void *data, uint32 len, const char *name) { return addSymbol(data, len, name, SymbolFlag_External); }
+    Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_Static); }
+    Symbol addExternalSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_External); }
     Symbol addStaticSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag_Static); }
     Symbol addExternalSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag_External); }
 
+    // if symbol with name symbol_name doesn't exist, it will be added as undefined symbol
     virtual Relocation  addRelocation(uint32 pos, const char *symbol_name, RelocationType type) = 0;
     virtual Relocation  addRelocation(uint32 pos, uint32 symbol_index, RelocationType type) = 0;
 

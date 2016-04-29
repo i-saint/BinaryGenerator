@@ -8,9 +8,9 @@ public:
     ~Section() override;
 
     // return position of added data
-    uint32 addData(const void *data, uint32 len) override;
+    uint32 addData(const void *data, size_t len) override;
     // add data and symbol
-    Symbol addSymbol(const void *data, uint32 len, const char *name, uint32 flags) override;
+    Symbol addSymbol(const void *data, size_t len, const char *name, uint32 flags) override;
     // add symbol only
     Symbol addSymbol(uint32 pos, const char *name, uint32 flags) override;
     // add undef symbol

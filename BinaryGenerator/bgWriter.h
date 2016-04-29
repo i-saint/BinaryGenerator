@@ -7,14 +7,14 @@ class COFFWriter
 {
 public:
     COFFWriter();
-    bool write(Context& ctx, std::ostream& os);
+    bool write(Context& ctx, IOutputStream& os);
 
     uint32 translateSectionFlags(uint32 flags);
     uint32 translateRelocationType(RelocationType rel);
 
 protected:
     Context *m_ctx;
-    std::ostream *m_os;
+    IOutputStream *m_os;
 };
 
 
@@ -24,11 +24,11 @@ class ELFWriter
 {
 public:
     ELFWriter();
-    bool write(Context& ctx, std::ostream& os);
+    bool write(Context& ctx, IOutputStream& os);
 
 protected:
     Context *m_ctx;
-    std::ostream *m_os;
+    IOutputStream *m_os;
 };
 
 } // namespace bg
