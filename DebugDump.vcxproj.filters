@@ -23,5 +23,8 @@
     <ClCompile Include="DebugDump\ddWindows.cpp">
       <Filter>DebugDump</Filter>
     </ClCompile>
+    <ClCompile Include="DebugDump\ddMakeObj.cpp">
+      <Filter>DebugDump</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

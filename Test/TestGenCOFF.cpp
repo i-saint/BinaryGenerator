@@ -9,7 +9,7 @@ void Generate_SayHello_COFF_x86()
     bg::Section *text = ctx.createSection(".text", bg::SectionType_Text);
     text->addExternalSymbol(code, sizeof(code), "_SayHello");
 
-    ctx.writeCOFFx86("SayHello_x86.obj");
+    ctx.write("SayHello_x86.obj", bg::Format_COFF_x86);
 }
 
 void Generate_PutMessage_COFF_x64()
@@ -31,7 +31,7 @@ void Generate_PutMessage_COFF_x64()
     const char exports[] = "/EXPORT:PutMessage ";
     directive->addStaticSymbol(exports, sizeof(exports), ".drectve");
 
-    ctx.writeCOFFx64("PutMessage_x64.obj");
+    ctx.write("PutMessage_x64.obj", bg::Format_COFF_x64);
 }
 
 

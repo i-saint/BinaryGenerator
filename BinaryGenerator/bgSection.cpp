@@ -18,22 +18,22 @@ Section::Section(Context *ctx, const char *name, uint32_t index, uint32_t flags)
 
 }
 
-Symbol Section::addSymbol(const void *data_, size_t len, const char *name, uint32_t flags)
+uint32_t Section::addData(const void *data, size_t len)
 {
     auto pos = (uint32_t)m_data.size();
-    auto *data = (const char*)data_;
-    m_data.insert(m_data.end(), data, data + len);
+    m_data.insert(m_data.end(), (char*)data, (char*)data + len);
+    return pos;
+}
 
+Symbol Section::addSymbol(const void *data, size_t len, const char *name, uint32_t flags)
+{
+    return addSymbol(addData(data, len), name, flags);
+}
+
+Symbol Section::addSymbol(uint32_t pos, const char *name, uint32_t flags)
+{
     auto ret = Symbol(this, pos, m_ctx->getStringTable().addString(name), flags);
     return m_ctx->getSymbolTable().insert(ret);
-}
-Symbol Section::addStaticSymbol(const void *data, size_t len, const char *name)
-{
-    return addSymbol(data, len, name, SymbolFlag_Static);
-}
-Symbol Section::addExternalSymbol(const void *data, size_t len, const char *name)
-{
-    return addSymbol(data, len, name, SymbolFlag_External);
 }
 
 Symbol Section::addExternalSymbol(const char *name)
@@ -61,7 +61,8 @@ Relocation Section::addRelocation(uint32_t pos, uint32_t symbol_index, Relocatio
 const char* Section::getName() const { return m_name; }
 uint32_t Section::getIndex() const { return m_index; }
 uint32_t Section::getFlags() const { return m_flags; }
-const std::string& Section::getData() const { return m_data; }
+uint32_t Section::getSize() const { return (uint32_t)m_data.size(); }
+char* Section::getData() { return m_data.empty() ? nullptr : &m_data[0]; }
 Section::Relocations& Section::getRelocations() { return m_reloc; }
 
 } // namespace bg

@@ -76,7 +76,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     );
     DWORD pos_symbols = pos_sections;
     for (auto& s : sections) {
-        pos_symbols += (DWORD)s->getData().size();
+        pos_symbols += s->getSize();
         pos_symbols += (DWORD)(IMAGE_SIZEOF_RELOCATION * s->getRelocations().size());
     }
 
@@ -115,7 +115,7 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     // build section info
     for (size_t si = 0; si < sections.size(); ++si) {
         auto& section = sections[si];
-        auto& data = section->getData();
+        DWORD datasize = section->getSize();
         auto& rels = section->getRelocations();
 
         auto& sh = coff_sects[si];
@@ -123,9 +123,9 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
 
         memcpy(sh.Name, section->getName(), 8);
         sh.VirtualAddress = 0;
-        sh.SizeOfRawData = (DWORD)data.size();
+        sh.SizeOfRawData = datasize;
         sh.PointerToRawData = pos_sections;
-        sh.PointerToRelocations = rels.empty() ? 0 : pos_sections + (DWORD)data.size();
+        sh.PointerToRelocations = rels.empty() ? 0 : pos_sections + datasize;
         sh.PointerToLinenumbers = 0;
         sh.NumberOfRelocations = (WORD)rels.size();
         sh.NumberOfLinenumbers = 0;
@@ -159,9 +159,8 @@ bool COFFWriter<T>::write(Context& ctx, std::ostream& os)
     // section contents
     for (size_t si = 0; si < sections.size(); ++si) {
         auto& section = sections[si];
-        auto& data = section->getData();
-        if (!data.empty()) {
-            m_os->write(data.c_str(), data.size());
+        if (section->getData()) {
+            m_os->write(section->getData(), section->getSize());
         }
         if (!coff_rels.empty()) {
             for (auto& r : coff_rels[si]) {

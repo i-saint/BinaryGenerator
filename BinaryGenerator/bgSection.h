@@ -29,21 +29,30 @@ public:
 public:
     Section(Context *ctx, const char *name, uint32_t index, uint32_t flags);
 
-    Symbol              addSymbol(const void *data, size_t len, const char *name, uint32_t flags);
-    Symbol              addStaticSymbol(const void *data, size_t len, const char *name);
-    Symbol              addExternalSymbol(const void *data, size_t len, const char *name);
+    // return position of added data
+    uint32_t addData(const void *data, size_t len);
+    // add data and symbol
+    Symbol addSymbol(const void *data, size_t len, const char *name, uint32_t flags);
+    // add symbol only
+    Symbol addSymbol(uint32_t pos, const char *name, uint32_t flags);
+    // add ext symbol
+    Symbol addExternalSymbol(const char *name);
 
-    Relocation          addRelocation(uint32_t pos, const char *symbol_name, RelocationType type);
-    Relocation          addRelocation(uint32_t pos, uint32_t symbol_index, RelocationType type);
+    // utilities
+    Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_Static); }
+    Symbol addExternalSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_External); }
+    Symbol addStaticSymbol(uint32_t pos, const char *name) { return addSymbol(pos, name, SymbolFlag_Static); }
+    Symbol addExternalSymbol(uint32_t pos, const char *name) { return addSymbol(pos, name, SymbolFlag_External); }
 
-    const char*         getName() const;
-    uint32_t            getIndex() const;
-    uint32_t            getFlags() const;
-    const std::string&  getData() const;
-    Relocations&        getRelocations();
+    Relocation      addRelocation(uint32_t pos, const char *symbol_name, RelocationType type);
+    Relocation      addRelocation(uint32_t pos, uint32_t symbol_index, RelocationType type);
 
-public:
-    Symbol              addExternalSymbol(const char *name);
+    const char*     getName() const;
+    uint32_t        getIndex() const;
+    uint32_t        getFlags() const;
+    uint32_t        getSize() const;
+    char*           getData();
+    Relocations&    getRelocations();
 
 private:
     Context *m_ctx;

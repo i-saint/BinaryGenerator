@@ -13,23 +13,28 @@ namespace dd {
 
 BOOL CALLBACK SymCallback(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext)
 {
-    auto& ret = *((std::vector<Symbol>*)UserContext);
+    auto& ret = *((Symbols*)UserContext);
+
+    Symbol sym;
+    sym.name = std::string(pSymInfo->Name, pSymInfo->Name + pSymInfo->NameLen);
+    sym.addr = uint32(pSymInfo->Address - pSymInfo->ModBase);
+    sym.size = pSymInfo->Size;
+    ret.emplace_back(sym);
 
     return TRUE;
-
 }
 
-std::vector<Symbol> Dump_Win(const Config& conf)
+Symbols GatherSymbols(const Config& conf)
 {
+    HANDLE proc = conf.target_process != nullptr ? (HANDLE)conf.target_process : ::GetCurrentProcess();
     DWORD opt = SYMOPT_DEFERRED_LOADS;
     ::SymSetOptions(opt);
-    ::SymInitialize(::GetCurrentProcess(), NULL, TRUE);
+    ::SymInitialize(proc, conf.additional_search_path, TRUE);
 
-
-    std::vector<Symbol> ret;
-
-    HANDLE proc = conf.target_process != nullptr ? (HANDLE)conf.target_process : ::GetCurrentProcess();
-    ::SymEnumSymbols(proc, 0, "*!*", SymCallback, &ret);
+    char filter[256];
+    sprintf(filter, "%s!*", conf.target_module ? conf.target_module : "*");
+    Symbols ret;
+    ::SymEnumSymbols(proc, 0, filter, SymCallback, &ret);
     return ret;
 }
 

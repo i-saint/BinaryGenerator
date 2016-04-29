@@ -1,6 +1,18 @@
 #pragma once
 namespace bg {
 
+enum Format {
+    Format_COFF_x86,
+    Format_COFF_x64,
+    Format_ELF_x86,
+    Format_ELF_x64,
+
+    //Format_COFF_ARM32,
+    //Format_COFF_ARM64,
+    //Format_ELF_ARM32,
+    //Format_ELF_ARM64,
+};
+
 class Context
 {
 public:
@@ -21,15 +33,8 @@ public:
     SymbolTable&        getSymbolTable();
     StringTable&        getStringTable();
 
-
-    bool writeCOFFx86(const char *path);
-    bool writeCOFFx64(const char *path);
-    bool writeELFx86(const char *path);
-    bool writeELFx64(const char *path);
-    bool writeCOFFx86(std::ostream &os);
-    bool writeCOFFx64(std::ostream &os);
-    bool writeELFx86(std::ostream &os);
-    bool writeELFx64(std::ostream &os);
+    bool write(const char *path, Format fmt);
+    bool write(std::ostream &os, Format fmt);
 
 private:
     Sections            m_sections;

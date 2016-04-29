@@ -15,12 +15,18 @@
     <ClInclude Include="DebugDump\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DebugDump\ddMakeObj.cpp" />
     <ClCompile Include="DebugDump\ddWindows.cpp" />
     <ClCompile Include="DebugDump\DebugDump.cpp" />
     <ClCompile Include="DebugDump\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Master|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="BinaryGenerator.vcxproj">
+      <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{215DCBDB-55FF-4B3E-A2BF-C9419939409F}</ProjectGuid>
