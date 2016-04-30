@@ -33,15 +33,21 @@ class ISection;
 class StringTable;
 
 enum Format {
-    Format_PECOFF_x86_Obj,
+    Format_PECOFF_x86_Obj = 0x100,
     Format_PECOFF_x86_Exe,
     Format_PECOFF_x86_DLL,
-    Format_PECOFF_x64_Obj,
+
+    Format_PECOFF_x64_Obj = 0x200,
     Format_PECOFF_x64_Exe,
     Format_PECOFF_x64_DLL,
 
-    Format_ELF_x86_Obj,
-    Format_ELF_x64_Obj,
+    Format_ELF_x86_Obj = 0x300,
+    Format_ELF_x86_Exe,
+    Format_ELF_x86_DLL,
+
+    Format_ELF_x64_Obj = 0x400,
+    Format_ELF_x64_Exe,
+    Format_ELF_x64_DLL,
 };
 
 enum SectionFlag {
@@ -135,9 +141,9 @@ class ISection
 public:
     virtual ~ISection() {}
 
-    // add data and return position of added data
+    // add data and return position of added data. data can be null
     virtual uint32 addData(const void *data, size_t len) = 0;
-    // add data and symbol
+    // add data and symbol. data can be null
     virtual Symbol addSymbol(const void *data, size_t len, const char *name, uint32 flags) = 0;
     // add symbol only
     virtual Symbol addSymbol(uint32 pos, const char *name, uint32 flags) = 0;

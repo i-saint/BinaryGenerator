@@ -28,26 +28,36 @@
 
 namespace bg {
 
+struct PECOFFTypesCommon
+{
+    typedef IMAGE_DOS_HEADER        IMAGE_DOS_HEADER;
+    typedef IMAGE_FILE_HEADER       IMAGE_FILE_HEADER;
+    typedef IMAGE_SECTION_HEADER    IMAGE_SECTION_HEADER;
+    typedef IMAGE_SYMBOL            IMAGE_SYMBOL;
+    typedef IMAGE_RELOCATION        IMAGE_RELOCATION;
+    typedef IMAGE_EXPORT_DIRECTORY  IMAGE_EXPORT_DIRECTORY;
+};
+
 template<class Arch> struct PECOFFTypes;
 
 template<>
-struct PECOFFTypes<Arch_x86>
+struct PECOFFTypes<Arch_x86> : PECOFFTypesCommon
 {
-    typedef IMAGE_NT_HEADERS32 IMAGE_NT_HEADERS;
-    typedef IMAGE_OPTIONAL_HEADER32 IMAGE_OPTIONAL_HEADER;
+    typedef IMAGE_NT_HEADERS32          IMAGE_NT_HEADERS;
+    typedef IMAGE_OPTIONAL_HEADER32     IMAGE_OPTIONAL_HEADER;
 };
 
 template<>
-struct PECOFFTypes<Arch_x64>
+struct PECOFFTypes<Arch_x64> : PECOFFTypesCommon
 {
-    typedef IMAGE_NT_HEADERS64 IMAGE_NT_HEADERS;
-    typedef IMAGE_OPTIONAL_HEADER64 IMAGE_OPTIONAL_HEADER;
+    typedef IMAGE_NT_HEADERS64          IMAGE_NT_HEADERS;
+    typedef IMAGE_OPTIONAL_HEADER64     IMAGE_OPTIONAL_HEADER;
 };
 
 
 
 template<class Arch>
-struct PECOFFImpl
+struct PECOFFImpl : public PECOFFTypes<Arch>
 {
     static WORD getMachineType();
     static uint32 translateSectionFlags(uint32 flags);
@@ -141,10 +151,10 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
     auto& symbols = m_ctx->getSymbolTable().getSymbols();
     auto& strings = m_ctx->getStringTable().getData();
 
-    IMAGE_FILE_HEADER coff_header;
-    std::vector<IMAGE_SECTION_HEADER> coff_sects;
-    std::vector<std::vector<IMAGE_RELOCATION>> coff_rels;
-    std::vector<IMAGE_SYMBOL> coff_syms;
+    Impl::IMAGE_FILE_HEADER coff_header;
+    std::vector<Impl::IMAGE_SECTION_HEADER> coff_sects;
+    std::vector<std::vector<Impl::IMAGE_RELOCATION>> coff_rels;
+    std::vector<Impl::IMAGE_SYMBOL> coff_syms;
 
     DWORD pos_sections = DWORD(
         IMAGE_SIZEOF_FILE_HEADER +
@@ -225,11 +235,11 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
     // write actual data
 
     // file header
-    m_os->write((char*)&coff_header, IMAGE_SIZEOF_FILE_HEADER);
+    m_os->write(&coff_header, IMAGE_SIZEOF_FILE_HEADER);
 
     // section headers
     for (auto& sh : coff_sects) {
-        m_os->write((char*)&sh, IMAGE_SIZEOF_SECTION_HEADER);
+        m_os->write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
     }
 
     // section contents
@@ -240,20 +250,20 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
         }
         if (!coff_rels.empty()) {
             for (auto& r : coff_rels[si]) {
-                m_os->write((char*)&r, IMAGE_SIZEOF_RELOCATION);
+                m_os->write(&r, IMAGE_SIZEOF_RELOCATION);
             }
         }
     }
 
     // symbol table
     for (auto& s : coff_syms) {
-        m_os->write((char*)&s, IMAGE_SIZEOF_SYMBOL);
+        m_os->write(&s, IMAGE_SIZEOF_SYMBOL);
     }
 
     // string table
     {
         DWORD len = (DWORD)strings.size() + sizeof(DWORD);
-        m_os->write((char*)&len, sizeof(len));
+        m_os->write(&len, sizeof(len));
         m_os->write(strings.c_str(), strings.size());
     }
 
@@ -264,6 +274,21 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
 template<class Arch>
 bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
 {
+    typedef PECOFFImpl<Arch> Impl;
+
+    Impl::IMAGE_DOS_HEADER dos_header;
+    Impl::IMAGE_NT_HEADERS nt_headers;
+    Impl::IMAGE_EXPORT_DIRECTORY export_dir;
+    std::vector<Impl::IMAGE_SECTION_HEADER> sec_headers;
+
+
+    os.write(&dos_header, sizeof(dos_header));
+    os.write(&nt_headers, sizeof(nt_headers));
+    os.write(&export_dir, sizeof(export_dir));
+    for(auto& sh : sec_headers) {
+        m_os->write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
+    }
+
     return false;
 }
 
@@ -271,6 +296,8 @@ bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
 template<class Arch>
 bool PECOFFWriter<Arch>::writeDLL(Context& ctx, IOutputStream& os)
 {
+    typedef PECOFFImpl<Arch> Impl;
+
     return false;
 }
 

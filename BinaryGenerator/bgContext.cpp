@@ -58,28 +58,32 @@ bool Context::write(const char *path, Format fmt)
 
 bool Context::write(IOutputStream &os, Format fmt)
 {
+#define Impl(Enum, Writer, Arch, Func)\
+    case Enum: {\
+        Writer<Arch> writer;\
+        return writer.Func(*this, os);\
+    }\
+
     switch (fmt) {
-    case Format_PECOFF_x86_Obj:
-    {
-        PECOFFWriter<Arch_x86> writer;
-        return writer.writeObj(*this, os);
+        Impl(Format_PECOFF_x86_Obj, PECOFFWriter, Arch_x86, writeObj);
+        Impl(Format_PECOFF_x86_Exe, PECOFFWriter, Arch_x86, writeExe);
+        Impl(Format_PECOFF_x86_DLL, PECOFFWriter, Arch_x86, writeDLL);
+
+        Impl(Format_PECOFF_x64_Obj, PECOFFWriter, Arch_x64, writeObj);
+        Impl(Format_PECOFF_x64_Exe, PECOFFWriter, Arch_x64, writeExe);
+        Impl(Format_PECOFF_x64_DLL, PECOFFWriter, Arch_x64, writeDLL);
+
+        Impl(Format_ELF_x86_Obj, ELFWriter, Arch_x86, writeObj);
+        Impl(Format_ELF_x86_Exe, ELFWriter, Arch_x86, writeExe);
+        Impl(Format_ELF_x86_DLL, ELFWriter, Arch_x86, writeDLL);
+
+        Impl(Format_ELF_x64_Obj, ELFWriter, Arch_x64, writeObj);
+        Impl(Format_ELF_x64_Exe, ELFWriter, Arch_x64, writeExe);
+        Impl(Format_ELF_x64_DLL, ELFWriter, Arch_x64, writeDLL);
     }
-    case Format_PECOFF_x64_Obj:
-    {
-        PECOFFWriter<Arch_x64> writer;
-        return writer.writeObj(*this, os);
-    }
-    case Format_ELF_x86_Obj:
-    {
-        ELFWriter<Arch_x86> writer;
-        return writer.writeObj(*this, os);
-    }
-    case Format_ELF_x64_Obj:
-    {
-        ELFWriter<Arch_x64> writer;
-        return writer.writeObj(*this, os);
-    }
-    }
+
+#undef Impl
+
     return false;
 }
 

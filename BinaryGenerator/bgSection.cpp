@@ -20,7 +20,12 @@ Section::~Section()
 uint32 Section::addData(const void *data, size_t len)
 {
     auto pos = (uint32)m_data.size();
-    m_data.insert(m_data.end(), (char*)data, (char*)data + len);
+    if (data) {
+        m_data.insert(m_data.end(), (char*)data, (char*)data + len);
+    }
+    else {
+        m_data.resize(m_data.size() + len);
+    }
     return pos;
 }
 
