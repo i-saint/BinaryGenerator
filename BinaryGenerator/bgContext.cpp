@@ -59,25 +59,25 @@ bool Context::write(const char *path, Format fmt)
 bool Context::write(IOutputStream &os, Format fmt)
 {
     switch (fmt) {
-    case Format_COFF_x86:
+    case Format_PECOFF_x86_Obj:
     {
-        COFFWriter<Traits_x86> writer;
-        return writer.write(*this, os);
+        PECOFFWriter<Arch_x86> writer;
+        return writer.writeObj(*this, os);
     }
-    case Format_COFF_x64:
+    case Format_PECOFF_x64_Obj:
     {
-        COFFWriter<Traits_x64> writer;
-        return writer.write(*this, os);
+        PECOFFWriter<Arch_x64> writer;
+        return writer.writeObj(*this, os);
     }
-    case Format_ELF_x86:
+    case Format_ELF_x86_Obj:
     {
-        ELFWriter<Traits_x86> writer;
-        return writer.write(*this, os);
+        ELFWriter<Arch_x86> writer;
+        return writer.writeObj(*this, os);
     }
-    case Format_ELF_x64:
+    case Format_ELF_x64_Obj:
     {
-        ELFWriter<Traits_x64> writer;
-        return writer.write(*this, os);
+        ELFWriter<Arch_x64> writer;
+        return writer.writeObj(*this, os);
     }
     }
     return false;

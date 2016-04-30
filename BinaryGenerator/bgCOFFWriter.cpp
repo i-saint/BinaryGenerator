@@ -28,31 +28,112 @@
 
 namespace bg {
 
-template<class T>
-COFFWriter<T>::COFFWriter()
+template<class Arch> struct PECOFFTypes;
+
+template<>
+struct PECOFFTypes<Arch_x86>
+{
+    typedef IMAGE_NT_HEADERS32 IMAGE_NT_HEADERS;
+    typedef IMAGE_OPTIONAL_HEADER32 IMAGE_OPTIONAL_HEADER;
+};
+
+template<>
+struct PECOFFTypes<Arch_x64>
+{
+    typedef IMAGE_NT_HEADERS64 IMAGE_NT_HEADERS;
+    typedef IMAGE_OPTIONAL_HEADER64 IMAGE_OPTIONAL_HEADER;
+};
+
+
+
+template<class Arch>
+struct PECOFFImpl
+{
+    static WORD getMachineType();
+    static uint32 translateSectionFlags(uint32 flags);
+    static uint32 translateRelocationType(RelocationType rel);
+};
+
+template<> WORD PECOFFImpl<Arch_x86>::getMachineType() { return IMAGE_FILE_MACHINE_I386; }
+template<> WORD PECOFFImpl<Arch_x64>::getMachineType() { return IMAGE_FILE_MACHINE_AMD64; }
+
+
+template<class Arch>
+uint32 PECOFFImpl<Arch>::translateSectionFlags(uint32 flags)
+{
+    uint32 r = 0;
+    if ((flags & SectionFlag_Code)) {
+        r |= IMAGE_SCN_CNT_CODE;
+        r |= IMAGE_SCN_ALIGN_16BYTES;
+    }
+    if ((flags & SectionFlag_IData)) {
+        r |= IMAGE_SCN_CNT_INITIALIZED_DATA;
+        r |= IMAGE_SCN_ALIGN_16BYTES;
+    }
+    if ((flags & SectionFlag_UData)) {
+        r |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
+        r |= IMAGE_SCN_ALIGN_16BYTES;
+    }
+    if ((flags & SectionFlag_Info)) {
+        r |= IMAGE_SCN_LNK_INFO;
+        r |= IMAGE_SCN_ALIGN_1BYTES;
+    }
+    if ((flags & SectionFlag_Read)) {
+        r |= IMAGE_SCN_MEM_READ;
+    }
+    if ((flags & SectionFlag_Write)) {
+        r |= IMAGE_SCN_MEM_WRITE;
+    }
+    if ((flags & SectionFlag_Execute)) {
+        r |= IMAGE_SCN_MEM_EXECUTE;
+    }
+    if ((flags & SectionFlag_Shared)) {
+        r |= IMAGE_SCN_MEM_SHARED;
+    }
+    if ((flags & SectionFlag_Remove)) {
+        r |= IMAGE_SCN_LNK_REMOVE;
+    }
+    return r;
+}
+
+template<>
+uint32 PECOFFImpl<Arch_x86>::translateRelocationType(RelocationType rel)
+{
+    switch (rel) {
+    case RelocationType_ABS:        return IMAGE_REL_I386_ABSOLUTE;
+    case RelocationType_REL32:      return IMAGE_REL_I386_REL32;
+    case RelocationType_ADDR32:     return IMAGE_REL_I386_DIR32;
+    case RelocationType_ADDR32NB:   return IMAGE_REL_I386_DIR32NB;
+    case RelocationType_ADDR64:     break;
+    }
+    return 0;
+}
+
+template<>
+uint32 PECOFFImpl<Arch_x64>::translateRelocationType(RelocationType rel)
+{
+    switch (rel) {
+    case RelocationType_ABS:        return IMAGE_REL_AMD64_ABSOLUTE;
+    case RelocationType_REL32:      return IMAGE_REL_AMD64_REL32;
+    case RelocationType_ADDR32:     return IMAGE_REL_AMD64_ADDR32;
+    case RelocationType_ADDR32NB:   return IMAGE_REL_AMD64_ADDR32NB;
+    case RelocationType_ADDR64:     return IMAGE_REL_AMD64_ADDR64;
+    }
+    return 0;
+}
+
+
+template<class Arch>
+PECOFFWriter<Arch>::PECOFFWriter()
     : m_ctx()
     , m_os()
 {
 }
 
-template<class Traits> struct COFFImpl;
-
-template<>
-struct COFFImpl<Traits_x86>
+template<class Arch>
+bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
 {
-    static const WORD Machine = IMAGE_FILE_MACHINE_I386;
-};
-
-template<>
-struct COFFImpl<Traits_x64>
-{
-    static const WORD Machine = IMAGE_FILE_MACHINE_AMD64;
-};
-
-template<class T>
-bool COFFWriter<T>::write(Context& ctx, IOutputStream& os)
-{
-    typedef COFFImpl<T> ImplT;
+    typedef PECOFFImpl<Arch> Impl;
 
     m_ctx = &ctx;
     m_os = &os;
@@ -75,7 +156,7 @@ bool COFFWriter<T>::write(Context& ctx, IOutputStream& os)
         pos_symbols += (DWORD)(IMAGE_SIZEOF_RELOCATION * s->getRelocations().size());
     }
 
-    coff_header.Machine = ImplT::Machine;
+    coff_header.Machine = Impl::getMachineType();
     coff_header.NumberOfSections = (WORD)sections.size();
     coff_header.TimeDateStamp = 0;
     coff_header.PointerToSymbolTable = pos_symbols;
@@ -124,7 +205,7 @@ bool COFFWriter<T>::write(Context& ctx, IOutputStream& os)
         sh.PointerToLinenumbers = 0;
         sh.NumberOfRelocations = (WORD)rels.size();
         sh.NumberOfLinenumbers = 0;
-        sh.Characteristics = translateSectionFlags(section->getFlags());
+        sh.Characteristics = Impl::translateSectionFlags(section->getFlags());
 
         // build relocation info
         irels.resize(rels.size());
@@ -133,7 +214,7 @@ bool COFFWriter<T>::write(Context& ctx, IOutputStream& os)
             auto& coff = irels[ri];
             coff.DUMMYUNIONNAME.VirtualAddress = rel.addr;
             coff.SymbolTableIndex = rel.symbol_index;
-            coff.Type = translateRelocationType(rel.type);
+            coff.Type = Impl::translateRelocationType(rel.type);
         }
 
         pos_sections += sh.SizeOfRawData;
@@ -179,71 +260,21 @@ bool COFFWriter<T>::write(Context& ctx, IOutputStream& os)
     return true;
 }
 
-template<class T>
-uint32 COFFWriter<T>::translateSectionFlags(uint32 flags)
+
+template<class Arch>
+bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
 {
-    uint32 r = 0;
-    if ((flags & SectionFlag_Code)) {
-        r |= IMAGE_SCN_CNT_CODE;
-        r |= IMAGE_SCN_ALIGN_16BYTES;
-    }
-    if ((flags & SectionFlag_IData)) {
-        r |= IMAGE_SCN_CNT_INITIALIZED_DATA;
-        r |= IMAGE_SCN_ALIGN_16BYTES;
-    }
-    if ((flags & SectionFlag_Udata)) {
-        r |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
-        r |= IMAGE_SCN_ALIGN_16BYTES;
-    }
-    if ((flags & SectionFlag_Info)) {
-        r |= IMAGE_SCN_LNK_INFO;
-        r |= IMAGE_SCN_ALIGN_1BYTES;
-    }
-    if ((flags & SectionFlag_Read)) {
-        r |= IMAGE_SCN_MEM_READ;
-    }
-    if ((flags & SectionFlag_Write)) {
-        r |= IMAGE_SCN_MEM_WRITE;
-    }
-    if ((flags & SectionFlag_Execute)) {
-        r |= IMAGE_SCN_MEM_EXECUTE;
-    }
-    if ((flags & SectionFlag_Shared)) {
-        r |= IMAGE_SCN_MEM_SHARED;
-    }
-    if ((flags & SectionFlag_Remove)) {
-        r |= IMAGE_SCN_LNK_REMOVE;
-    }
-    return r;
+    return false;
 }
 
-template<>
-uint32 COFFWriter<Traits_x86>::translateRelocationType(RelocationType rel)
+
+template<class Arch>
+bool PECOFFWriter<Arch>::writeDLL(Context& ctx, IOutputStream& os)
 {
-    switch (rel) {
-    case RelocationType_ABS: return IMAGE_REL_I386_ABSOLUTE;
-    case RelocationType_REL32: return IMAGE_REL_I386_REL32;
-    case RelocationType_ADDR32: return IMAGE_REL_I386_DIR32;
-    case RelocationType_ADDR32NB: return IMAGE_REL_I386_DIR32NB;
-    case RelocationType_ADDR64: break;
-    }
-    return 0;
+    return false;
 }
 
-template<>
-uint32 COFFWriter<Traits_x64>::translateRelocationType(RelocationType rel)
-{
-    switch (rel) {
-    case RelocationType_ABS: return IMAGE_REL_AMD64_ABSOLUTE;
-    case RelocationType_REL32: return IMAGE_REL_AMD64_REL32;
-    case RelocationType_ADDR32: return IMAGE_REL_AMD64_ADDR32;
-    case RelocationType_ADDR32NB: return IMAGE_REL_AMD64_ADDR32NB;
-    case RelocationType_ADDR64: return IMAGE_REL_AMD64_ADDR64;
-    }
-    return 0;
-}
-
-template class COFFWriter<Traits_x86>;
-template class COFFWriter<Traits_x64>;
+template class PECOFFWriter<Arch_x86>;
+template class PECOFFWriter<Arch_x64>;
 
 } // namespace bg

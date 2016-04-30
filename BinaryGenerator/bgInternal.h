@@ -12,9 +12,9 @@ class Section;
 class SymbolTable;
 class StringTable;
 
-class Traits_x86;
-class Traits_x64;
-class Traits_ARM;
+class Arch_x86;
+class Arch_x64;
+class Arch_ARM;
 
 } // namespace bg
 

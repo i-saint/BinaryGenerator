@@ -1,16 +1,15 @@
 #pragma once
 namespace bg {
 
-// Traits: Traits_x86, Traits_x64
-template<class Traits>
-class COFFWriter
+// Arch: Arch_x86, Arch_x64
+template<class Arch>
+class PECOFFWriter
 {
 public:
-    COFFWriter();
-    bool write(Context& ctx, IOutputStream& os);
-
-    uint32 translateSectionFlags(uint32 flags);
-    uint32 translateRelocationType(RelocationType rel);
+    PECOFFWriter();
+    bool writeObj(Context& ctx, IOutputStream& os);
+    bool writeExe(Context& ctx, IOutputStream& os);
+    bool writeDLL(Context& ctx, IOutputStream& os);
 
 protected:
     Context *m_ctx;
@@ -18,13 +17,15 @@ protected:
 };
 
 
-// Traits: Traits_x86, Traits_x64
-template<class Traits>
+// Arch: Arch_x86, Arch_x64
+template<class Arch>
 class ELFWriter
 {
 public:
     ELFWriter();
-    bool write(Context& ctx, IOutputStream& os);
+    bool writeObj(Context& ctx, IOutputStream& os);
+    bool writeExe(Context& ctx, IOutputStream& os);
+    bool writeDLL(Context& ctx, IOutputStream& os);
 
 protected:
     Context *m_ctx;

@@ -15,7 +15,7 @@ ELFWriter<T>::ELFWriter()
 template<class Traits> struct ELFImpl;
 
 template<>
-struct ELFImpl<Traits_x86>
+struct ELFImpl<Arch_x86>
 {
     static const int elf_class = ELFCLASS32;
 
@@ -29,7 +29,7 @@ struct ELFImpl<Traits_x86>
 };
 
 template<>
-struct ELFImpl<Traits_x64>
+struct ELFImpl<Arch_x64>
 {
     static const int elf_class = ELFCLASS64;
 
@@ -43,7 +43,7 @@ struct ELFImpl<Traits_x64>
 };
 
 template<class T>
-bool ELFWriter<T>::write(Context& ctx, IOutputStream& os)
+bool ELFWriter<T>::writeObj(Context& ctx, IOutputStream& os)
 {
     typedef ELFImpl<T> Impl;
 
@@ -66,7 +66,23 @@ bool ELFWriter<T>::write(Context& ctx, IOutputStream& os)
     return false;
 }
 
-template class ELFWriter<Traits_x86>;
-template class ELFWriter<Traits_x64>;
+template<class T>
+bool ELFWriter<T>::writeExe(Context& ctx, IOutputStream& os)
+{
+    typedef ELFImpl<T> Impl;
+
+    return false;
+}
+
+template<class T>
+bool ELFWriter<T>::writeDLL(Context& ctx, IOutputStream& os)
+{
+    typedef ELFImpl<T> Impl;
+
+    return false;
+}
+
+template class ELFWriter<Arch_x86>;
+template class ELFWriter<Arch_x64>;
 
 } // namespace bg

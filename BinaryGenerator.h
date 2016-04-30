@@ -33,10 +33,15 @@ class ISection;
 class StringTable;
 
 enum Format {
-    Format_COFF_x86,
-    Format_COFF_x64,
-    Format_ELF_x86,
-    Format_ELF_x64,
+    Format_PECOFF_x86_Obj,
+    Format_PECOFF_x86_Exe,
+    Format_PECOFF_x86_DLL,
+    Format_PECOFF_x64_Obj,
+    Format_PECOFF_x64_Exe,
+    Format_PECOFF_x64_DLL,
+
+    Format_ELF_x86_Obj,
+    Format_ELF_x64_Obj,
 };
 
 enum SectionFlag {
@@ -47,14 +52,14 @@ enum SectionFlag {
     SectionFlag_Shared  = 1 << 3,
     SectionFlag_Code    = 1 << 4,
     SectionFlag_IData   = 1 << 5,
-    SectionFlag_Udata   = 1 << 6,
+    SectionFlag_UData   = 1 << 6,
     SectionFlag_Info    = 1 << 7,
     SectionFlag_Remove  = 1 << 8,
 
     SectionType_Text    = SectionFlag_Read | SectionFlag_Execute | SectionFlag_Code,
     SectionType_TextX   = SectionFlag_Read | SectionFlag_Write | SectionFlag_Execute | SectionFlag_Code,
     SectionType_IData   = SectionFlag_Read | SectionFlag_IData,
-    SectionType_UData   = SectionFlag_Read | SectionFlag_Write | SectionFlag_Udata,
+    SectionType_UData   = SectionFlag_Read | SectionFlag_Write | SectionFlag_UData,
     SectionType_Info    = SectionFlag_Info | SectionFlag_Remove,
 };
 
