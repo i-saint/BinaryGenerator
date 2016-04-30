@@ -23,6 +23,7 @@ public:
 Context::Context()
     : m_sym(new SymbolTable(this))
     , m_str(new StringTable(this))
+    , m_baseaddr()
 {
 }
 
@@ -66,6 +67,11 @@ Section* Context::createSection(const char *name, uint32 flags)
     return s;
 }
 
+void Context::setEntryPoint(const char *symbol_name)
+{
+    m_entrypoint = symbol_name;
+}
+
 void Context::addDLLExport(const char *symbol_name)
 {
     m_dllexports.insert(symbol_name);
@@ -84,6 +90,9 @@ void Context::addLibrary(const char *filename)
 Context::Sections&      Context::getSections() { return m_sections; }
 SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
+
+uint64                  Context::getBaseAddr() const { return m_baseaddr; }
+std::string&            Context::getEntryPoint() { return m_entrypoint; }
 Context::DLLExports&    Context::getDLLExports() { return m_dllexports; }
 Context::DLLImports&    Context::getDLLImports() { return m_dllimports; }
 Context::Libraries&     Context::getLibraries() { return m_libraries; }

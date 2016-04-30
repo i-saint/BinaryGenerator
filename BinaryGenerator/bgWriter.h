@@ -11,7 +11,9 @@ public:
     bool writeExe(Context& ctx, IOutputStream& os);
     bool writeDLL(Context& ctx, IOutputStream& os);
 
-protected:
+private:
+    bool writePE(bool is_dll);
+
     Context *m_ctx;
     IOutputStream *m_os;
 };
@@ -27,7 +29,7 @@ public:
     bool writeExe(Context& ctx, IOutputStream& os);
     bool writeDLL(Context& ctx, IOutputStream& os);
 
-protected:
+private:
     Context *m_ctx;
     IOutputStream *m_os;
 };

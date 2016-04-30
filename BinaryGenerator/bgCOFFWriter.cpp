@@ -41,7 +41,26 @@ struct PECOFFImpl : public PECOFFTypes<Arch>
     static WORD getMachineType();
     static uint32 translateSectionFlags(uint32 flags);
     static uint32 translateRelocationType(RelocationType rel);
+    static uint32 buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& sec, uint32 pos);
 };
+
+template<class Arch>
+uint32 PECOFFImpl<Arch>::buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& section, uint32 pos)
+{
+    auto& relocations = section.getRelocations();
+
+    memcpy(sh.Name, section.getName(), 8);
+    sh.VirtualAddress = section.getVirtualAddress();
+    sh.SizeOfRawData = section.getSize();
+    sh.PointerToRawData = pos;
+    sh.PointerToRelocations = relocations.empty() ? 0 : pos + section.getSize();
+    sh.PointerToLinenumbers = 0;
+    sh.NumberOfRelocations = (WORD)relocations.size();
+    sh.NumberOfLinenumbers = 0;
+    sh.Characteristics = translateSectionFlags(section.getFlags());
+
+    return uint32(pos + section.getSize() + IMAGE_SIZEOF_RELOCATION * relocations.size());
+}
 
 template<> WORD PECOFFImpl<Arch_x86>::getMachineType() { return IMAGE_FILE_MACHINE_I386; }
 template<> WORD PECOFFImpl<Arch_x64>::getMachineType() { return IMAGE_FILE_MACHINE_AMD64; }
@@ -202,35 +221,20 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
 
     // build section info
     for (size_t si = 0; si < sections.size(); ++si) {
-        auto& section = sections[si];
-        DWORD datasize = section->getSize();
-        auto& rels = section->getRelocations();
-
-        auto& sh = coff_sects[si];
-        auto& irels = coff_rels[si];
-
-        memcpy(sh.Name, section->getName(), 8);
-        sh.VirtualAddress = 0;
-        sh.SizeOfRawData = datasize;
-        sh.PointerToRawData = pos_sections;
-        sh.PointerToRelocations = rels.empty() ? 0 : pos_sections + datasize;
-        sh.PointerToLinenumbers = 0;
-        sh.NumberOfRelocations = (WORD)rels.size();
-        sh.NumberOfLinenumbers = 0;
-        sh.Characteristics = Impl::translateSectionFlags(section->getFlags());
+        auto& section = *sections[si];
+        pos_sections = Impl::buildSectionHeader(coff_sects[si], section, pos_sections);
 
         // build relocation info
-        irels.resize(rels.size());
+        auto& rels = section.getRelocations();
+        auto& crels = coff_rels[si];
+        crels.resize(rels.size());
         for (size_t ri = 0; ri < rels.size(); ++ri) {
             auto& rel = rels[ri];
-            auto& coff = irels[ri];
+            auto& coff = crels[ri];
             coff.DUMMYUNIONNAME.VirtualAddress = rel.addr;
             coff.SymbolTableIndex = rel.symbol_index;
             coff.Type = Impl::translateRelocationType(rel.type);
         }
-
-        pos_sections += sh.SizeOfRawData;
-        pos_sections += IMAGE_SIZEOF_RELOCATION * sh.NumberOfRelocations;
     }
 
 
@@ -247,13 +251,9 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
     // section contents
     for (size_t si = 0; si < sections.size(); ++si) {
         auto& section = sections[si];
-        if (section->getData()) {
-            m_os->write(section->getData(), section->getSize());
-        }
-        if (!coff_rels.empty()) {
-            for (auto& r : coff_rels[si]) {
-                m_os->write(&r, IMAGE_SIZEOF_RELOCATION);
-            }
+        m_os->write(section->getData(), section->getSize());
+        for (auto& r : coff_rels[si]) {
+            m_os->write(&r, IMAGE_SIZEOF_RELOCATION);
         }
     }
 
@@ -272,6 +272,22 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
     return true;
 }
 
+
+template<class Arch>
+bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
+{
+    m_ctx = &ctx;
+    m_os = &os;
+    return writePE(false);
+}
+
+template<class Arch>
+bool PECOFFWriter<Arch>::writeDLL(Context& ctx, IOutputStream& os)
+{
+    m_ctx = &ctx;
+    m_os = &os;
+    return writePE(true);
+}
 
 // structure of PE (.exe, .dll) file
 
@@ -292,42 +308,81 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
 //                          //
 //--------------------------//
 
-
 template<class Arch>
-bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
+bool PECOFFWriter<Arch>::writePE(bool is_dll)
 {
     typedef PECOFFImpl<Arch> Impl;
 
-    m_ctx = &ctx;
-    m_os = &os;
     auto& sections = m_ctx->getSections();
 
     Impl::IMAGE_DOS_HEADER dos_header;
     Impl::IMAGE_NT_HEADERS nt_headers;
     std::vector<Impl::IMAGE_SECTION_HEADER> sec_headers;
+    uint32 pos_sections = uint32(
+        sizeof(Impl::IMAGE_DOS_HEADER) + sizeof(Impl::IMAGE_NT_HEADERS) + IMAGE_SIZEOF_SECTION_HEADER * sections.size());
+
+    memset(&dos_header, 0, sizeof(dos_header));
+    memset(&nt_headers, 0, sizeof(nt_headers));
+
+    dos_header.e_magic = 0x5A4D;
+    dos_header.e_lfanew = sizeof(Impl::IMAGE_DOS_HEADER);
+    {
+        auto& fh = nt_headers.FileHeader;
+        fh.Machine = Impl::getMachineType();
+        fh.NumberOfSections = (WORD)sections.size();
+        fh.TimeDateStamp = 0;
+        fh.PointerToSymbolTable = 0;
+        fh.NumberOfSymbols = 0;
+        fh.SizeOfOptionalHeader = sizeof(Impl::IMAGE_OPTIONAL_HEADER);
+
+        fh.Characteristics = IMAGE_FILE_EXECUTABLE_IMAGE;
+        if (is_dll) {
+            fh.Characteristics |= IMAGE_FILE_DLL;
+        }
+        if (fh.Machine == IMAGE_FILE_MACHINE_AMD64) {
+            fh.Characteristics |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
+        }
+    }
+    {
+        auto& oh = nt_headers.OptionalHeader;
+        oh.Magic = 0x020B;
+
+        oh.SizeOfCode;
+        oh.SizeOfInitializedData;
+        oh.SizeOfUninitializedData;
+        oh.AddressOfEntryPoint;
+        oh.BaseOfCode;
+        oh.ImageBase = (Impl::intptr)m_ctx->getBaseAddr();
+        oh.SectionAlignment = 0x1000;
+        oh.FileAlignment = 1;
+        oh.SizeOfImage;
+        oh.SizeOfHeaders;
+
+        oh.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_GUI;
+        oh.DllCharacteristics = IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE;
+        oh.SizeOfStackReserve = 0x100000;
+        oh.SizeOfStackCommit  = 0x1000;
+        oh.SizeOfHeapReserve  = 0x100000;
+        oh.SizeOfHeapCommit   = 0x1000;
+        oh.NumberOfRvaAndSizes = IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
+    }
+
+    // build section info
+    for (size_t si = 0; si < sections.size(); ++si) {
+        pos_sections = Impl::buildSectionHeader(sec_headers[si], *sections[si], pos_sections);
+    }
 
 
-    os.write(&dos_header, sizeof(dos_header));
-    os.write(&nt_headers, sizeof(nt_headers));
-    for(auto& sh : sec_headers) {
+    m_os->write(&dos_header, sizeof(dos_header));
+    m_os->write(&nt_headers, sizeof(nt_headers));
+    for (auto& sh : sec_headers) {
         m_os->write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
     }
     for (auto& s : sections) {
-        if (s->getData()) {
-            m_os->write(s->getData(), s->getSize());
-        }
+        m_os->write(s->getData(), s->getSize());
     }
 
-    return false;
-}
-
-
-template<class Arch>
-bool PECOFFWriter<Arch>::writeDLL(Context& ctx, IOutputStream& os)
-{
-    typedef PECOFFImpl<Arch> Impl;
-
-    return false;
+    return true;
 }
 
 template class PECOFFWriter<Arch_x86>;

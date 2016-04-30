@@ -132,9 +132,12 @@ public:
     // flags: combination of SectionType
     virtual ISection*   createSection(const char *name, uint32 flags) = 0;
 
+    // only relevant for executable
+    virtual void        setEntryPoint(const char *symbol_name) = 0;
     virtual void        addDLLExport(const char *symbol_name) = 0;
+    // only relevant for executable
     virtual void        addDLLImport(const char *dll_name, const char *symbol_name) = 0;
-    // add library dependency
+    // add library dependency. only relevant for non-executable
     virtual void        addLibrary(const char *filename) = 0;
 
     virtual bool        write(const char *path, Format fmt) = 0;
