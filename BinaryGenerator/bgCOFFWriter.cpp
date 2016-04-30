@@ -3,29 +3,6 @@
 #include "bgWriter.h"
 #include "bgCOFF.h"
 
-
-// structure of COFF file
-
-//--------------------------//
-// IMAGE_FILE_HEADER        //
-//--------------------------//
-// IMAGE_SECTION_HEADER     //
-//  * num sections          //
-//--------------------------//
-//                          //
-//                          //
-//                          //
-// section data             //
-//  * num sections          //
-//                          //
-//                          //
-//--------------------------//
-// IMAGE_SYMBOL             //
-//  * num symbols           //
-//--------------------------//
-// string table             //
-//--------------------------//
-
 namespace bg {
 
 struct PECOFFTypesCommon
@@ -43,6 +20,7 @@ template<class Arch> struct PECOFFTypes;
 template<>
 struct PECOFFTypes<Arch_x86> : PECOFFTypesCommon
 {
+    typedef uint32 intptr;
     typedef IMAGE_NT_HEADERS32          IMAGE_NT_HEADERS;
     typedef IMAGE_OPTIONAL_HEADER32     IMAGE_OPTIONAL_HEADER;
 };
@@ -50,6 +28,7 @@ struct PECOFFTypes<Arch_x86> : PECOFFTypesCommon
 template<>
 struct PECOFFTypes<Arch_x64> : PECOFFTypesCommon
 {
+    typedef uint64 intptr;
     typedef IMAGE_NT_HEADERS64          IMAGE_NT_HEADERS;
     typedef IMAGE_OPTIONAL_HEADER64     IMAGE_OPTIONAL_HEADER;
 };
@@ -139,6 +118,29 @@ PECOFFWriter<Arch>::PECOFFWriter()
     , m_os()
 {
 }
+
+
+// structure of COFF (.obj) file
+
+//--------------------------//
+// IMAGE_FILE_HEADER        //
+//--------------------------//
+// IMAGE_SECTION_HEADER     //
+//  * num sections          //
+//--------------------------//
+//                          //
+//                          //
+//                          //
+// section data             //
+//  * num sections          //
+//                          //
+//                          //
+//--------------------------//
+// IMAGE_SYMBOL             //
+//  * num symbols           //
+//--------------------------//
+// string table             //
+//--------------------------//
 
 template<class Arch>
 bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
@@ -271,22 +273,49 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
 }
 
 
+// structure of PE (.exe, .dll) file
+
+//--------------------------//
+// IMAGE_DOS_HEADER         //
+//--------------------------//
+// IMAGE_NT_HEADER          //
+//--------------------------//
+// IMAGE_SECTION_HEADER     //
+//  * num sections          //
+//--------------------------//
+//                          //
+//                          //
+//                          //
+// section data             //
+//  * num sections          //
+//                          //
+//                          //
+//--------------------------//
+
+
 template<class Arch>
 bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
 {
     typedef PECOFFImpl<Arch> Impl;
 
+    m_ctx = &ctx;
+    m_os = &os;
+    auto& sections = m_ctx->getSections();
+
     Impl::IMAGE_DOS_HEADER dos_header;
     Impl::IMAGE_NT_HEADERS nt_headers;
-    Impl::IMAGE_EXPORT_DIRECTORY export_dir;
     std::vector<Impl::IMAGE_SECTION_HEADER> sec_headers;
 
 
     os.write(&dos_header, sizeof(dos_header));
     os.write(&nt_headers, sizeof(nt_headers));
-    os.write(&export_dir, sizeof(export_dir));
     for(auto& sh : sec_headers) {
         m_os->write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
+    }
+    for (auto& s : sections) {
+        if (s->getData()) {
+            m_os->write(s->getData(), s->getSize());
+        }
     }
 
     return false;

@@ -128,11 +128,17 @@ public:
 
     virtual size_t      getNumSections() const = 0;
     virtual ISection*   getSection(size_t i) = 0;
+    virtual ISection*   findSection(const char *name) = 0;
     // flags: combination of SectionType
     virtual ISection*   createSection(const char *name, uint32 flags) = 0;
 
-    virtual bool write(const char *path, Format fmt) = 0;
-    virtual bool write(IOutputStream &os, Format fmt) = 0;
+    virtual void        addDLLExport(const char *symbol_name) = 0;
+    virtual void        addDLLImport(const char *dll_name, const char *symbol_name) = 0;
+    // add library dependency
+    virtual void        addLibrary(const char *filename) = 0;
+
+    virtual bool        write(const char *path, Format fmt) = 0;
+    virtual bool        write(IOutputStream &os, Format fmt) = 0;
 };
 
 
@@ -163,8 +169,11 @@ public:
     virtual const char* getName() const = 0;
     virtual uint32      getIndex() const = 0;
     virtual uint32      getFlags() const = 0;
+    virtual uint32      getVirtualAddress() const = 0;
     virtual uint32      getSize() const = 0;
     virtual char*       getData() = 0;
+
+    virtual void        setVirtualAddress(uint32 va)  = 0;
 };
 
 

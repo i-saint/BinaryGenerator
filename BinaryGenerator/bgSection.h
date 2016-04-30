@@ -22,8 +22,11 @@ public:
     const char* getName() const override;
     uint32      getIndex() const override;
     uint32      getFlags() const override;
+    uint32      getVirtualAddress() const override;
     uint32      getSize() const override;
     char*       getData() override;
+
+    void        setVirtualAddress(uint32 va) override;
 
 public:
     typedef std::vector<Relocation> Relocations;
@@ -34,8 +37,9 @@ private:
     char m_name[8];
     uint32 m_index;
     uint32 m_flags;
+    uint32 m_virtual_addr;
     std::string m_data;
-    std::vector<Relocation> m_reloc;
+    Relocations m_reloc;
 };
 
 } // namespace bg

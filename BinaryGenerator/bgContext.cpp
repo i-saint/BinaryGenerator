@@ -35,18 +35,58 @@ void Context::release()
     delete this;
 }
 
-size_t Context::getNumSections() const { return m_sections.size(); }
-Section* Context::getSection(size_t i) { return m_sections[i].get(); }
+size_t Context::getNumSections() const
+{
+    return m_sections.size();
+}
+
+Section* Context::getSection(size_t i)
+{
+    return i < m_sections.size() ? m_sections[i].get() : nullptr;
+}
+
+Section* Context::findSection(const char *name)
+{
+    for (auto& s : m_sections) {
+        if (strcmp(s->getName(), name) == 0) {
+            return s.get();
+        }
+    }
+    return nullptr;
+}
+
 Section* Context::createSection(const char *name, uint32 flags)
 {
+    if (Section* f = findSection(name)) {
+        return f;
+    }
+
     auto *s = new Section(this, name, (uint32)m_sections.size(), flags);
     m_sections.emplace_back(SectionPtr(s));
     return s;
 }
 
-Context::Sections&  Context::getSections() { return m_sections; }
-SymbolTable&        Context::getSymbolTable() { return *m_sym; }
-StringTable&        Context::getStringTable() { return *m_str; }
+void Context::addDLLExport(const char *symbol_name)
+{
+    m_dllexports.insert(symbol_name);
+}
+
+void Context::addDLLImport(const char *dll_name, const char *symbol_name)
+{
+    m_dllimports[dll_name].insert(symbol_name);
+}
+
+void Context::addLibrary(const char *filename)
+{
+    m_libraries.insert(filename);
+}
+
+Context::Sections&      Context::getSections() { return m_sections; }
+SymbolTable&            Context::getSymbolTable() { return *m_sym; }
+StringTable&            Context::getStringTable() { return *m_str; }
+Context::DLLExports&    Context::getDLLExports() { return m_dllexports; }
+Context::DLLImports&    Context::getDLLImports() { return m_dllimports; }
+Context::Libraries&     Context::getLibraries() { return m_libraries; }
 
 
 bool Context::write(const char *path, Format fmt)

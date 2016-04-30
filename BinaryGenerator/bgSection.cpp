@@ -7,6 +7,7 @@ Section::Section(Context *ctx, const char *name, uint32 index, uint32 flags)
     : m_ctx(ctx)
     , m_index(index)
     , m_flags(flags)
+    , m_virtual_addr()
 {
     memset(m_name, 0, sizeof(m_name));
     strncpy(m_name, name, 8);
@@ -75,8 +76,13 @@ Relocation Section::addRelocation(uint32 pos, uint32 symbol_index, RelocationTyp
 const char* Section::getName() const { return m_name; }
 uint32 Section::getIndex() const { return m_index; }
 uint32 Section::getFlags() const { return m_flags; }
+uint32 Section::getVirtualAddress() const { return m_virtual_addr; }
+
 uint32 Section::getSize() const { return (uint32)m_data.size(); }
 char* Section::getData() { return m_data.empty() ? nullptr : &m_data[0]; }
+
+void Section::setVirtualAddress(uint32 va) { m_virtual_addr = va; }
+
 Section::Relocations& Section::getRelocations() { return m_reloc; }
 
 } // namespace bg
