@@ -41,4 +41,14 @@ Symbol* SymbolTable::findSymbol(const char *name)
     return nullptr;
 }
 
+uint32 SymbolTable::getVirtualAddress(const char *name)
+{
+    Symbol *sym = findSymbol(name);
+    if (!sym) { return 0; }
+
+    uint32 ret = sym->addr;
+    if (sym->section) { ret += sym->section->getVirtualAddress(); }
+    return ret;
+}
+
 } // namespace bg

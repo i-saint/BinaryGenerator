@@ -2,35 +2,37 @@
 
 void Generate_COFF_x86()
 {
-    // void PutMessage() { puts("hello!"); }
+    // void SayHello() { puts("hello!"); }
     const char string[] = "hello!";
     const char code[] = "\x68\x00\x00\x00\x00\xE8\x00\x00\x00\x00\x59\xC3";
+    const char name[] = "_SayHello";
 
     bg::IContext *ctx = bg::CreateContext();
     bg::ISection *text = ctx->createSection(".text", bg::SectionType_Text);
     bg::Symbol sym_str  = text->addStaticSymbol(string, sizeof(string), "$hello");
-    bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), "PutMessage");
-    text->addRelocation(sym_code.addr + 1, "$hello", bg::RelocationType_REL32);
+    bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), name);
+    text->addRelocation(sym_code.addr + 1, "$hello", bg::RelocationType_ADDR32);
     text->addRelocation(sym_code.addr + 6, "_puts", bg::RelocationType_REL32);
 
-    ctx->write("PutMessage_x64.obj", bg::Format_PECOFF_x86_Obj);
+    ctx->write("SayHello_x86.obj", bg::Format_PECOFF_x86_Obj);
     ctx->release();
 }
 
 void Generate_COFF_x64()
 {
-    // void PutMessage() { puts("hello!"); }
+    // void SayHello() { puts("hello!"); }
     const char string[] = "hello!";
     const char code[] = "\x48\x8D\x0D\x00\x00\x00\x00\xE9\x00\x00\x00\x00";
+    const char name[] = "SayHello";
 
     bg::IContext *ctx = bg::CreateContext();
     bg::ISection *text = ctx->createSection(".text", bg::SectionType_Text);
     bg::Symbol sym_str  = text->addStaticSymbol(string, sizeof(string), "$hello");
-    bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), "PutMessage");
+    bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), name);
     text->addRelocation(sym_code.addr + 3, "$hello", bg::RelocationType_REL32);
     text->addRelocation(sym_code.addr + 8, "puts", bg::RelocationType_REL32);
 
-    ctx->write("PutMessage_x64.obj", bg::Format_PECOFF_x64_Obj);
+    ctx->write("SayHello_x64.obj", bg::Format_PECOFF_x64_Obj);
     ctx->release();
 }
 

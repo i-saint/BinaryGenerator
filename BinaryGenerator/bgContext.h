@@ -38,6 +38,7 @@ public:
     SymbolTable&    getSymbolTable();
     StringTable&    getStringTable();
 
+    std::string&    getFileName();
     Subsystem       getSubsystem() const;
     uint64          getBaseAddress() const;
     std::string&    getEntryPoint();
@@ -50,6 +51,7 @@ private:
     SymbolTablePtr      m_sym;
     StringTablePtr      m_str;
 
+    std::string         m_filename;
     uint64              m_baseaddr;
     Subsystem           m_subsystem;
     std::string         m_entrypoint;

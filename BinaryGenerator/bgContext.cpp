@@ -101,8 +101,9 @@ void Context::addLibrary(const char *filename)
 Context::Sections&      Context::getSections() { return m_sections; }
 SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
-Subsystem               Context::getSubsystem() const { return m_subsystem; }
 
+std::string&            Context::getFileName() { return m_filename; }
+Subsystem               Context::getSubsystem() const { return m_subsystem; }
 uint64                  Context::getBaseAddress() const { return m_baseaddr; }
 std::string&            Context::getEntryPoint() { return m_entrypoint; }
 Context::DLLExports&    Context::getDLLExports() { return m_dllexports; }
@@ -112,6 +113,15 @@ Context::Libraries&     Context::getLibraries() { return m_libraries; }
 
 bool Context::write(const char *path, Format fmt)
 {
+    {
+        size_t len = strlen(path);
+        size_t separator = 0;
+        for (size_t i = 0; i < len; ++i) {
+            if (path[i] == '/' || path[i] == '\\') { separator = i + 1; }
+        }
+        m_filename = path + separator;
+    }
+
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     StdOutputStream s(ofs);
     return write(s, fmt);
