@@ -32,8 +32,9 @@ Symbol* SymbolTable::getSymbol(size_t i)
 
 Symbol* SymbolTable::findSymbol(const char *name)
 {
+    if (!name) { return nullptr; }
     for (auto& s : m_symbols) {
-        if (s.name == name) {
+        if (strcmp(s.name.str(), name) == 0) {
             return &s;
         }
     }

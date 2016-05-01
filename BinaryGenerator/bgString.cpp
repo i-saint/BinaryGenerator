@@ -46,7 +46,7 @@ const String& StringTable::addString(const char *str)
 
 const char* StringTable::get(uint32 i)
 {
-    return &m_table[i];
+    return &m_table[i - 4];
 }
 
 const std::string& StringTable::getData() const { return m_table; }
