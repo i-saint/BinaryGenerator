@@ -38,12 +38,31 @@ struct PECOFFTypes<Arch_x64> : PECOFFTypesCommon
 template<class Arch>
 struct PECOFFImpl : public PECOFFTypes<Arch>
 {
-    static WORD getMachineType();
-    static uint32 translateSectionFlags(uint32 flags, bool executable);
-    static uint32 translateRelocationType(RelocationType rel);
-    static uint32 buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& sec, uint32 pos, uint32 al, bool executable);
-    static uint32 align(IOutputStream* os, uint32 pos, uint32 al);
+    WORD getMachineType();
+    uint32 translateSectionFlags(uint32 flags, bool executable);
+    uint32 translateRelocationType(RelocationType rel);
+    uint32 buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& sec, uint32 pos, uint32 al, bool executable);
+    uint32 align(uint32 pos, uint32 al);
+    uint32 align(IOutputStream& os, uint32 pos, uint32 al);
 };
+
+
+template<class Arch>
+class PECOFFWriter : public PECOFFImpl<Arch>
+{
+public:
+    PECOFFWriter(Context& ctx, IOutputStream& os);
+    bool writeObj();
+    bool writeExe();
+    bool writeDLL();
+
+private:
+    bool writePE(bool is_dll);
+
+    Context& m_ctx;
+    IOutputStream& m_os;
+};
+
 
 template<class Arch>
 uint32 PECOFFImpl<Arch>::buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& section, uint32 pos, uint32 al, bool executable)
@@ -54,7 +73,7 @@ uint32 PECOFFImpl<Arch>::buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& s
     if (executable) {
         sh.Misc.VirtualSize = section.getSize();
         sh.VirtualAddress = section.getVirtualAddress();
-        sh.SizeOfRawData = align(nullptr, section.getSize(), al);
+        sh.SizeOfRawData = align(section.getSize(), al);
     }
     else {
         sh.SizeOfRawData = section.getSize();
@@ -138,23 +157,27 @@ uint32 PECOFFImpl<Arch_x64>::translateRelocationType(RelocationType rel)
 }
 
 template<class Arch>
-uint32 bg::PECOFFImpl<Arch>::align(IOutputStream* os, uint32 pos, uint32 al)
+uint32 PECOFFImpl<Arch>::align(uint32 pos, uint32 al)
 {
     uint32 pad = al - (pos % al);
-    if (os) {
-        char z = 0;
-        for (uint32 i = 0; i < pad; ++i) {
-            os->write(&z, 1);
-        }
+    return pos + pad;
+}
+template<class Arch>
+uint32 PECOFFImpl<Arch>::align(IOutputStream& os, uint32 pos, uint32 al)
+{
+    uint32 pad = al - (pos % al);
+    char z = 0;
+    for (uint32 i = 0; i < pad; ++i) {
+        os.write(&z, 1);
     }
     return pos + pad;
 }
 
 
 template<class Arch>
-PECOFFWriter<Arch>::PECOFFWriter()
-    : m_ctx()
-    , m_os()
+PECOFFWriter<Arch>::PECOFFWriter(Context& ctx, IOutputStream& os)
+    : m_ctx(ctx)
+    , m_os(os)
 {
 }
 
@@ -182,20 +205,16 @@ PECOFFWriter<Arch>::PECOFFWriter()
 //--------------------------//
 
 template<class Arch>
-bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
+bool PECOFFWriter<Arch>::writeObj()
 {
-    typedef PECOFFImpl<Arch> Impl;
+    auto& sections = m_ctx.getSections();
+    auto& symbols = m_ctx.getSymbolTable().getSymbols();
+    auto& strings = m_ctx.getStringTable().getData();
 
-    m_ctx = &ctx;
-    m_os = &os;
-    auto& sections = m_ctx->getSections();
-    auto& symbols = m_ctx->getSymbolTable().getSymbols();
-    auto& strings = m_ctx->getStringTable().getData();
-
-    Impl::IMAGE_FILE_HEADER coff_header;
-    std::vector<Impl::IMAGE_SECTION_HEADER> coff_sects;
-    std::vector<std::vector<Impl::IMAGE_RELOCATION>> coff_rels;
-    std::vector<Impl::IMAGE_SYMBOL> coff_syms;
+    IMAGE_FILE_HEADER coff_header;
+    std::vector<IMAGE_SECTION_HEADER> coff_sects;
+    std::vector<std::vector<IMAGE_RELOCATION>> coff_rels;
+    std::vector<IMAGE_SYMBOL> coff_syms;
 
     DWORD pos_sections = DWORD(
         IMAGE_SIZEOF_FILE_HEADER +
@@ -207,7 +226,7 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
         pos_symbols += (DWORD)(IMAGE_SIZEOF_RELOCATION * s->getRelocations().size());
     }
 
-    coff_header.Machine = Impl::getMachineType();
+    coff_header.Machine = getMachineType();
     coff_header.NumberOfSections = (WORD)sections.size();
     coff_header.TimeDateStamp = 0;
     coff_header.PointerToSymbolTable = pos_symbols;
@@ -242,7 +261,7 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
     // build section info
     for (size_t si = 0; si < sections.size(); ++si) {
         auto& section = *sections[si];
-        pos_sections = Impl::buildSectionHeader(coff_sects[si], section, pos_sections, 1, false);
+        pos_sections = buildSectionHeader(coff_sects[si], section, pos_sections, 1, false);
 
         // build relocation info
         auto& rels = section.getRelocations();
@@ -253,7 +272,7 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
             auto& coff = crels[ri];
             coff.DUMMYUNIONNAME.VirtualAddress = rel.addr;
             coff.SymbolTableIndex = rel.symbol_index;
-            coff.Type = Impl::translateRelocationType(rel.type);
+            coff.Type = translateRelocationType(rel.type);
         }
     }
 
@@ -261,32 +280,32 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
     // write actual data
 
     // file header
-    m_os->write(&coff_header, IMAGE_SIZEOF_FILE_HEADER);
+    m_os.write(&coff_header, IMAGE_SIZEOF_FILE_HEADER);
 
     // section headers
     for (auto& sh : coff_sects) {
-        m_os->write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
+        m_os.write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
     }
 
     // section contents
     for (size_t si = 0; si < sections.size(); ++si) {
         auto& section = sections[si];
-        m_os->write(section->getData(), section->getSize());
+        m_os.write(section->getData(), section->getSize());
         for (auto& r : coff_rels[si]) {
-            m_os->write(&r, IMAGE_SIZEOF_RELOCATION);
+            m_os.write(&r, IMAGE_SIZEOF_RELOCATION);
         }
     }
 
     // symbol table
     for (auto& s : coff_syms) {
-        m_os->write(&s, IMAGE_SIZEOF_SYMBOL);
+        m_os.write(&s, IMAGE_SIZEOF_SYMBOL);
     }
 
     // string table
     {
         DWORD len = (DWORD)strings.size() + sizeof(DWORD);
-        m_os->write(&len, sizeof(len));
-        m_os->write(strings.c_str(), strings.size());
+        m_os.write(&len, sizeof(len));
+        m_os.write(strings.c_str(), strings.size());
     }
 
     return true;
@@ -294,18 +313,14 @@ bool PECOFFWriter<Arch>::writeObj(Context& ctx, IOutputStream& os)
 
 
 template<class Arch>
-bool PECOFFWriter<Arch>::writeExe(Context& ctx, IOutputStream& os)
+bool PECOFFWriter<Arch>::writeExe()
 {
-    m_ctx = &ctx;
-    m_os = &os;
     return writePE(false);
 }
 
 template<class Arch>
-bool PECOFFWriter<Arch>::writeDLL(Context& ctx, IOutputStream& os)
+bool PECOFFWriter<Arch>::writeDLL()
 {
-    m_ctx = &ctx;
-    m_os = &os;
     return writePE(true);
 }
 
@@ -331,13 +346,11 @@ bool PECOFFWriter<Arch>::writeDLL(Context& ctx, IOutputStream& os)
 template<class Arch>
 bool PECOFFWriter<Arch>::writePE(bool is_dll)
 {
-    typedef PECOFFImpl<Arch> Impl;
+    auto& sections = m_ctx.getSections();
 
-    auto& sections = m_ctx->getSections();
-
-    Impl::IMAGE_DOS_HEADER dos_header;
-    Impl::IMAGE_NT_HEADERS nt_headers;
-    std::vector<Impl::IMAGE_SECTION_HEADER> sec_headers;
+    IMAGE_DOS_HEADER dos_header;
+    IMAGE_NT_HEADERS nt_headers;
+    std::vector<IMAGE_SECTION_HEADER> sec_headers;
     memset(&dos_header, 0, sizeof(dos_header));
     memset(&nt_headers, 0, sizeof(nt_headers));
     sec_headers.resize(sections.size());
@@ -347,7 +360,7 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
     uint32 image_size = 0;
     uint32 entry_point = 0;
     uint32 pos_sections = uint32(
-        sizeof(Impl::IMAGE_DOS_HEADER) + sizeof(Impl::IMAGE_NT_HEADERS) + IMAGE_SIZEOF_SECTION_HEADER * sections.size());
+        sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + IMAGE_SIZEOF_SECTION_HEADER * sections.size());
 
     {
         uint32 pos = section_align;
@@ -364,30 +377,30 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
         image_size = pos;
     }
     {
-        auto &name = m_ctx->getEntryPoint();
-        auto *sym = m_ctx->getSymbolTable().findSymbol(name.c_str());
+        auto &name = m_ctx.getEntryPoint();
+        auto *sym = m_ctx.getSymbolTable().findSymbol(name.c_str());
         if (sym) {
             entry_point = sym->section->getVirtualAddress() + sym->addr;
         }
     }
 
-    dos_header.e_magic = 0x5A4D;
-    dos_header.e_lfanew = sizeof(Impl::IMAGE_DOS_HEADER);
+    dos_header.e_magic = 0x5A4D; // "MZ"
+    dos_header.e_lfanew = sizeof(IMAGE_DOS_HEADER);
     {
         auto& fh = nt_headers.FileHeader;
-        fh.Machine = Impl::getMachineType();
+        fh.Machine = getMachineType();
         fh.NumberOfSections = (WORD)sections.size();
         fh.TimeDateStamp = 0;
         fh.PointerToSymbolTable = 0;
         fh.NumberOfSymbols = 0;
-        fh.SizeOfOptionalHeader = sizeof(Impl::IMAGE_OPTIONAL_HEADER);
+        fh.SizeOfOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER);
 
         fh.Characteristics = IMAGE_FILE_EXECUTABLE_IMAGE;
         if (is_dll) {
             fh.Characteristics |= IMAGE_FILE_DLL;
         }
 
-        switch (Impl::getMachineType()) {
+        switch (getMachineType()) {
         case IMAGE_FILE_MACHINE_AMD64:
             fh.Characteristics |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
             break;
@@ -397,10 +410,10 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
         }
     }
     {
-        nt_headers.Signature = 0x4550;
+        nt_headers.Signature = 0x4550; // "PE"
 
         auto& oh = nt_headers.OptionalHeader;
-        switch (Impl::getMachineType()) {
+        switch (getMachineType()) {
         case IMAGE_FILE_MACHINE_AMD64:
             oh.Magic = 0x020B;
             break;
@@ -409,13 +422,12 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
             break;
         }
 
-        oh.SizeOfCode;
-        oh.SizeOfInitializedData;
-        oh.SizeOfUninitializedData;
+        oh.SizeOfCode;              // can be omitted
+        oh.SizeOfInitializedData;   // 
+        oh.SizeOfUninitializedData; // 
         oh.AddressOfEntryPoint = entry_point;
         oh.BaseOfCode = section_align;
-        oh.ImageBase = (Impl::intptr)m_ctx->getBaseAddr();
-        if (oh.ImageBase == 0) { oh.ImageBase = 0x00400000; }
+        oh.ImageBase = (intptr)m_ctx.getBaseAddress();
         oh.SectionAlignment = section_align;
         oh.FileAlignment = file_align;
         oh.MajorOperatingSystemVersion = 0x0006;
@@ -423,9 +435,16 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
         oh.MajorSubsystemVersion = 0x0006;
         oh.MinorSubsystemVersion = 0x0000;
         oh.SizeOfImage = image_size;
-        oh.SizeOfHeaders = Impl::align(nullptr, pos_sections, file_align);
+        oh.SizeOfHeaders = align(pos_sections, file_align);
 
-        oh.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
+        switch (m_ctx.getSubsystem()) {
+        case Subsystem_CUI:
+            oh.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
+            break;
+        case Subsystem_GUI:
+            oh.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_GUI;
+            break;
+        }
         oh.DllCharacteristics = IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE;
         oh.SizeOfStackReserve = 0x100000;
         oh.SizeOfStackCommit  = 0x1000;
@@ -436,28 +455,49 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
 
     // build section info
     {
-        uint32 spos = Impl::align(nullptr, pos_sections, file_align);
+        uint32 spos = align(pos_sections, file_align);
         for (size_t si = 0; si < sections.size(); ++si) {
-            spos = Impl::buildSectionHeader(sec_headers[si], *sections[si], spos, file_align, true);
+            spos = buildSectionHeader(sec_headers[si], *sections[si], spos, file_align, true);
         }
     }
 
-    m_os->write(&dos_header, sizeof(dos_header));
-    m_os->write(&nt_headers, sizeof(nt_headers));
+    m_os.write(&dos_header, sizeof(dos_header));
+    m_os.write(&nt_headers, sizeof(nt_headers));
     for (auto& sh : sec_headers) {
-        m_os->write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
+        m_os.write(&sh, IMAGE_SIZEOF_SECTION_HEADER);
     }
-    uint32 wpos = Impl::align(m_os, pos_sections, file_align);
+    uint32 wpos = align(m_os, pos_sections, file_align);
 
     for (auto& s : sections) {
-        m_os->write(s->getData(), s->getSize());
-        wpos = Impl::align(m_os, wpos + s->getSize(), file_align);
+        m_os.write(s->getData(), s->getSize());
+        wpos = align(m_os, wpos + s->getSize(), file_align);
     }
 
     return true;
 }
 
-template class PECOFFWriter<Arch_x86>;
-template class PECOFFWriter<Arch_x64>;
+template<class Arch> bool PECOFFWriteObj(Context& ctx, IOutputStream& os)
+{
+    PECOFFWriter<Arch> writer(ctx, os);
+    return writer.writeObj();
+}
+template<class Arch> bool PECOFFWriteExe(Context& ctx, IOutputStream& os)
+{
+    PECOFFWriter<Arch> writer(ctx, os);
+    return writer.writeExe();
+}
+template<class Arch> bool PECOFFWriteDLL(Context& ctx, IOutputStream& os)
+{
+    PECOFFWriter<Arch> writer(ctx, os);
+    return writer.writeDLL();
+}
+
+
+template bool PECOFFWriteObj<Arch_x86>(Context& ctx, IOutputStream& os);
+template bool PECOFFWriteExe<Arch_x86>(Context& ctx, IOutputStream& os);
+template bool PECOFFWriteDLL<Arch_x86>(Context& ctx, IOutputStream& os);
+template bool PECOFFWriteObj<Arch_x64>(Context& ctx, IOutputStream& os);
+template bool PECOFFWriteExe<Arch_x64>(Context& ctx, IOutputStream& os);
+template bool PECOFFWriteDLL<Arch_x64>(Context& ctx, IOutputStream& os);
 
 } // namespace bg

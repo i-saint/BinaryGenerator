@@ -14,6 +14,8 @@ public:
     // flags: combination of SectionType
     Section*    createSection(const char *name, uint32 flags) override;
 
+    void        setBaseAddress(uint64 addr) override;
+    void        setSubsystem(Subsystem ss) override;
     void        setEntryPoint(const char *symbol_name) override;
     void        addDLLExport(const char *symbol_name) override;
     void        addDLLImport(const char *dll_name, const char *symbol_name) override;
@@ -36,7 +38,8 @@ public:
     SymbolTable&    getSymbolTable();
     StringTable&    getStringTable();
 
-    uint64          getBaseAddr() const;
+    Subsystem       getSubsystem() const;
+    uint64          getBaseAddress() const;
     std::string&    getEntryPoint();
     DLLExports&     getDLLExports();
     DLLImports&     getDLLImports();
@@ -48,6 +51,7 @@ private:
     StringTablePtr      m_str;
 
     uint64              m_baseaddr;
+    Subsystem           m_subsystem;
     std::string         m_entrypoint;
     DLLExports          m_dllexports;
     DLLImports          m_dllimports;

@@ -5,13 +5,6 @@
 
 namespace bg {
 
-template<class T>
-ELFWriter<T>::ELFWriter()
-    : m_ctx()
-    , m_os()
-{
-}
-
 template<class Traits> struct ELFImpl;
 
 template<>
@@ -42,21 +35,40 @@ struct ELFImpl<Arch_x64>
     typedef Elf64_Dyn  Elf_Dyn;
 };
 
-template<class T>
-bool ELFWriter<T>::writeObj(Context& ctx, IOutputStream& os)
+// Arch: Arch_x86, Arch_x64
+template<class Arch>
+class ELFWriter : public ELFImpl<Arch>
 {
-    typedef ELFImpl<T> Impl;
+public:
+    ELFWriter(Context& ctx, IOutputStream& os);
+    bool writeObj();
+    bool writeExe();
+    bool writeDLL();
 
-    m_ctx = &ctx;
-    m_os = &os;
-    auto& sections = m_ctx->getSections();
-    auto& symbols = m_ctx->getSymbolTable().getSymbols();
-    auto& strings = m_ctx->getStringTable().getData();
+private:
+    Context& m_ctx;
+    IOutputStream& m_os;
+};
 
-    Impl::Elf_Ehdr elf_header;
-    std::vector<Impl::Elf_Shdr> elf_sections;
-    std::vector<std::vector<Impl::Elf_Rela>> elf_rels;
-    std::vector<Impl::Elf_Sym> elf_syms;
+template<class T>
+ELFWriter<T>::ELFWriter(Context& ctx, IOutputStream& os)
+    : m_ctx(ctx)
+    , m_os(os)
+{
+}
+
+
+template<class T>
+bool ELFWriter<T>::writeObj()
+{
+    auto& sections = m_ctx.getSections();
+    auto& symbols = m_ctx.getSymbolTable().getSymbols();
+    auto& strings = m_ctx.getStringTable().getData();
+
+    Elf_Ehdr elf_header;
+    std::vector<Elf_Shdr> elf_sections;
+    std::vector<std::vector<Elf_Rela>> elf_rels;
+    std::vector<Elf_Sym> elf_syms;
 
     elf_sections.resize(sections.size());
     elf_rels.resize(sections.size());
@@ -67,22 +79,40 @@ bool ELFWriter<T>::writeObj(Context& ctx, IOutputStream& os)
 }
 
 template<class T>
-bool ELFWriter<T>::writeExe(Context& ctx, IOutputStream& os)
+bool ELFWriter<T>::writeExe()
 {
-    typedef ELFImpl<T> Impl;
-
     return false;
 }
 
 template<class T>
-bool ELFWriter<T>::writeDLL(Context& ctx, IOutputStream& os)
+bool ELFWriter<T>::writeDLL()
 {
-    typedef ELFImpl<T> Impl;
-
     return false;
 }
 
-template class ELFWriter<Arch_x86>;
-template class ELFWriter<Arch_x64>;
+
+template<class Arch> bool ELFWriteObj(Context& ctx, IOutputStream& os)
+{
+    ELFWriter<Arch> writer(ctx, os);
+    return writer.writeObj();
+}
+template<class Arch> bool ELFWriteExe(Context& ctx, IOutputStream& os)
+{
+    ELFWriter<Arch> writer(ctx, os);
+    return writer.writeExe();
+}
+template<class Arch> bool ELFWriteDLL(Context& ctx, IOutputStream& os)
+{
+    ELFWriter<Arch> writer(ctx, os);
+    return writer.writeDLL();
+}
+
+
+template bool ELFWriteObj<Arch_x86>(Context& ctx, IOutputStream& os);
+template bool ELFWriteExe<Arch_x86>(Context& ctx, IOutputStream& os);
+template bool ELFWriteDLL<Arch_x86>(Context& ctx, IOutputStream& os);
+template bool ELFWriteObj<Arch_x64>(Context& ctx, IOutputStream& os);
+template bool ELFWriteExe<Arch_x64>(Context& ctx, IOutputStream& os);
+template bool ELFWriteDLL<Arch_x64>(Context& ctx, IOutputStream& os);
 
 } // namespace bg

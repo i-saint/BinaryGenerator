@@ -50,6 +50,11 @@ enum Format {
     Format_ELF_x64_DLL,
 };
 
+enum Subsystem {
+    Subsystem_CUI,
+    Subsystem_GUI,
+};
+
 enum SectionFlag {
     SectionFlag_None    = 0,
     SectionFlag_Read    = 1 << 0,
@@ -132,6 +137,10 @@ public:
     // flags: combination of SectionType
     virtual ISection*   createSection(const char *name, uint32 flags) = 0;
 
+    // only relevant for executable
+    virtual void        setBaseAddress(uint64 addr) = 0;
+    // subsystem for windows. only relevant for executable
+    virtual void        setSubsystem(Subsystem ss) = 0;
     // only relevant for executable
     virtual void        setEntryPoint(const char *symbol_name) = 0;
     virtual void        addDLLExport(const char *symbol_name) = 0;

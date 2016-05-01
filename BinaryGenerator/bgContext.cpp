@@ -24,6 +24,7 @@ Context::Context()
     : m_sym(new SymbolTable(this))
     , m_str(new StringTable(this))
     , m_baseaddr()
+    , m_subsystem(Subsystem_GUI)
 {
 }
 
@@ -67,6 +68,16 @@ Section* Context::createSection(const char *name, uint32 flags)
     return s;
 }
 
+void Context::setBaseAddress(uint64 addr)
+{
+    m_baseaddr = addr;
+}
+
+void Context::setSubsystem(Subsystem ss)
+{
+    m_subsystem = ss;
+}
+
 void Context::setEntryPoint(const char *symbol_name)
 {
     m_entrypoint = symbol_name;
@@ -90,8 +101,9 @@ void Context::addLibrary(const char *filename)
 Context::Sections&      Context::getSections() { return m_sections; }
 SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
+Subsystem               Context::getSubsystem() const { return m_subsystem; }
 
-uint64                  Context::getBaseAddr() const { return m_baseaddr; }
+uint64                  Context::getBaseAddress() const { return m_baseaddr; }
 std::string&            Context::getEntryPoint() { return m_entrypoint; }
 Context::DLLExports&    Context::getDLLExports() { return m_dllexports; }
 Context::DLLImports&    Context::getDLLImports() { return m_dllimports; }
@@ -107,28 +119,24 @@ bool Context::write(const char *path, Format fmt)
 
 bool Context::write(IOutputStream &os, Format fmt)
 {
-#define Impl(Enum, Writer, Arch, Func)\
-    case Enum: {\
-        Writer<Arch> writer;\
-        return writer.Func(*this, os);\
-    }\
+#define Impl(Enum, Func, Arch) case Enum: { return Func<Arch>(*this, os); }
 
     switch (fmt) {
-        Impl(Format_PECOFF_x86_Obj, PECOFFWriter, Arch_x86, writeObj);
-        Impl(Format_PECOFF_x86_Exe, PECOFFWriter, Arch_x86, writeExe);
-        Impl(Format_PECOFF_x86_DLL, PECOFFWriter, Arch_x86, writeDLL);
+        Impl(Format_PECOFF_x86_Obj, PECOFFWriteObj, Arch_x86);
+        Impl(Format_PECOFF_x86_Exe, PECOFFWriteExe, Arch_x86);
+        Impl(Format_PECOFF_x86_DLL, PECOFFWriteDLL, Arch_x86);
 
-        Impl(Format_PECOFF_x64_Obj, PECOFFWriter, Arch_x64, writeObj);
-        Impl(Format_PECOFF_x64_Exe, PECOFFWriter, Arch_x64, writeExe);
-        Impl(Format_PECOFF_x64_DLL, PECOFFWriter, Arch_x64, writeDLL);
+        Impl(Format_PECOFF_x64_Obj, PECOFFWriteObj, Arch_x64);
+        Impl(Format_PECOFF_x64_Exe, PECOFFWriteExe, Arch_x64);
+        Impl(Format_PECOFF_x64_DLL, PECOFFWriteDLL, Arch_x64);
 
-        Impl(Format_ELF_x86_Obj, ELFWriter, Arch_x86, writeObj);
-        Impl(Format_ELF_x86_Exe, ELFWriter, Arch_x86, writeExe);
-        Impl(Format_ELF_x86_DLL, ELFWriter, Arch_x86, writeDLL);
+        Impl(Format_ELF_x86_Obj, ELFWriteObj, Arch_x86);
+        Impl(Format_ELF_x86_Exe, ELFWriteExe, Arch_x86);
+        Impl(Format_ELF_x86_DLL, ELFWriteDLL, Arch_x86);
 
-        Impl(Format_ELF_x64_Obj, ELFWriter, Arch_x64, writeObj);
-        Impl(Format_ELF_x64_Exe, ELFWriter, Arch_x64, writeExe);
-        Impl(Format_ELF_x64_DLL, ELFWriter, Arch_x64, writeDLL);
+        Impl(Format_ELF_x64_Obj, ELFWriteObj, Arch_x64);
+        Impl(Format_ELF_x64_Exe, ELFWriteExe, Arch_x64);
+        Impl(Format_ELF_x64_DLL, ELFWriteDLL, Arch_x64);
     }
 
 #undef Impl
