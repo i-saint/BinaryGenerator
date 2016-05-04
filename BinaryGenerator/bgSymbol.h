@@ -4,7 +4,7 @@ namespace bg {
 class SymbolTable
 {
 public:
-    typedef std::vector<Symbol> Symbols;
+    using Symbols = std::vector<Symbol>;
 
 public:
     SymbolTable(Context *ctx);

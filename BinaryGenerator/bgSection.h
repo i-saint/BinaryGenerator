@@ -29,7 +29,7 @@ public:
     void        setVirtualAddress(uint32 va) override;
 
 public:
-    typedef std::vector<Relocation> Relocations;
+    using Relocations = std::vector<Relocation>;
     Relocations&    getRelocations();
 
 private:

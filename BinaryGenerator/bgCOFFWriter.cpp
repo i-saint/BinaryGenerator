@@ -53,7 +53,7 @@ template<class Arch>
 class PECOFFWriter : public PECOFFImpl<Arch>
 {
 public:
-    PECOFFWriter(Context& ctx, IOutputStream& os);
+    PECOFFWriter(PECOFFContext& ctx, IOutputStream& os);
     bool writeObj();
     bool writeExe();
     bool writeDLL();
@@ -65,7 +65,7 @@ private:
     void buildExportAddressTable(IMAGE_DATA_DIRECTORY& idd);
 
 
-    Context& m_ctx;
+    PECOFFContext& m_ctx;
     IOutputStream& m_os;
 
     std::unique_ptr<Section> m_internal_section;
@@ -182,7 +182,7 @@ uint32 PECOFFImpl<Arch>::align(IOutputStream& os, uint32 pos, uint32 al)
 
 
 template<class Arch>
-PECOFFWriter<Arch>::PECOFFWriter(Context& ctx, IOutputStream& os)
+PECOFFWriter<Arch>::PECOFFWriter(PECOFFContext& ctx, IOutputStream& os)
     : m_ctx(ctx)
     , m_os(os)
 {
@@ -572,28 +572,28 @@ void PECOFFWriter<Arch>::buildExportAddressTable(IMAGE_DATA_DIRECTORY& idd)
 
 
 
-template<class Arch> bool PECOFFWriteObj(Context& ctx, IOutputStream& os)
+template<class Arch> bool PECOFFWriteObj(PECOFFContext& ctx, IOutputStream& os)
 {
     PECOFFWriter<Arch> writer(ctx, os);
     return writer.writeObj();
 }
-template<class Arch> bool PECOFFWriteExe(Context& ctx, IOutputStream& os)
+template<class Arch> bool PECOFFWriteExe(PECOFFContext& ctx, IOutputStream& os)
 {
     PECOFFWriter<Arch> writer(ctx, os);
     return writer.writeExe();
 }
-template<class Arch> bool PECOFFWriteDLL(Context& ctx, IOutputStream& os)
+template<class Arch> bool PECOFFWriteDLL(PECOFFContext& ctx, IOutputStream& os)
 {
     PECOFFWriter<Arch> writer(ctx, os);
     return writer.writeDLL();
 }
 
 
-template bool PECOFFWriteObj<Arch_x86>(Context& ctx, IOutputStream& os);
-template bool PECOFFWriteExe<Arch_x86>(Context& ctx, IOutputStream& os);
-template bool PECOFFWriteDLL<Arch_x86>(Context& ctx, IOutputStream& os);
-template bool PECOFFWriteObj<Arch_x64>(Context& ctx, IOutputStream& os);
-template bool PECOFFWriteExe<Arch_x64>(Context& ctx, IOutputStream& os);
-template bool PECOFFWriteDLL<Arch_x64>(Context& ctx, IOutputStream& os);
+template bool PECOFFWriteObj<Arch_x86>(PECOFFContext& ctx, IOutputStream& os);
+template bool PECOFFWriteExe<Arch_x86>(PECOFFContext& ctx, IOutputStream& os);
+template bool PECOFFWriteDLL<Arch_x86>(PECOFFContext& ctx, IOutputStream& os);
+template bool PECOFFWriteObj<Arch_x64>(PECOFFContext& ctx, IOutputStream& os);
+template bool PECOFFWriteExe<Arch_x64>(PECOFFContext& ctx, IOutputStream& os);
+template bool PECOFFWriteDLL<Arch_x64>(PECOFFContext& ctx, IOutputStream& os);
 
 } // namespace bg

@@ -16,9 +16,11 @@ public:
     const std::string& getData() const;
 
 private:
+    using Entries = std::map<std::string, String>;
+
     Context *m_ctx;
     std::string m_table;
-    std::map<std::string, String> m_entries;
+    Entries m_entries;
 };
 
 } // namespace bg

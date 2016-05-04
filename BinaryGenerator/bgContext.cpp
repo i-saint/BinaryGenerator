@@ -4,9 +4,9 @@
 
 namespace bg {
 
-bgAPI IContext* CreateContext()
+bgAPI IPECOFFContext* CreatePECOFFContext()
 {
-    return new Context();
+    return new PECOFFContext();
 }
 
 class StdOutputStream : public IOutputStream
@@ -23,18 +23,11 @@ public:
 Context::Context()
     : m_sym(new SymbolTable(this))
     , m_str(new StringTable(this))
-    , m_baseaddr()
-    , m_subsystem(Subsystem::GUI)
 {
 }
 
 Context::~Context()
 {
-}
-
-void Context::release()
-{
-    delete this;
 }
 
 size_t Context::getNumSections() const
@@ -68,50 +61,65 @@ Section* Context::createSection(const char *name, SectionFlag flags)
     return s;
 }
 
-void Context::setBaseAddress(uint64 addr)
-{
-    m_baseaddr = addr;
-}
-
-void Context::setSubsystem(Subsystem ss)
-{
-    m_subsystem = ss;
-}
-
-void Context::setEntryPoint(const char *symbol_name)
-{
-    m_entrypoint = symbol_name;
-}
-
-void Context::addDLLExport(const char *symbol_name)
-{
-    m_dllexports.insert(symbol_name);
-}
-
-void Context::addDLLImport(const char *dll_name, const char *symbol_name)
-{
-    m_dllimports[dll_name].insert(symbol_name);
-}
-
-void Context::addLibrary(const char *filename)
-{
-    m_libraries.insert(filename);
-}
-
 Context::Sections&      Context::getSections() { return m_sections; }
 SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
 
-std::string&            Context::getFileName() { return m_filename; }
-Subsystem               Context::getSubsystem() const { return m_subsystem; }
-uint64                  Context::getBaseAddress() const { return m_baseaddr; }
-std::string&            Context::getEntryPoint() { return m_entrypoint; }
-Context::DLLExports&    Context::getDLLExports() { return m_dllexports; }
-Context::DLLImports&    Context::getDLLImports() { return m_dllimports; }
-Context::Libraries&     Context::getLibraries() { return m_libraries; }
 
+PECOFFContext::PECOFFContext()
+    : m_baseaddr()
+    , m_subsystem(Subsystem::GUI)
+{
+}
+PECOFFContext::~PECOFFContext()
+{
+}
 
-bool Context::write(const char *path, Format fmt)
+void PECOFFContext::release() { delete this; }
+size_t PECOFFContext::getNumSections() const { return super::getNumSections(); }
+Section* PECOFFContext::getSection(size_t i) { return super::getSection(i); }
+Section* PECOFFContext::findSection(const char *name) { return super::findSection(name); }
+Section* PECOFFContext::createSection(const char *name, SectionFlag flags) { return super::createSection(name, flags); }
+
+void PECOFFContext::setBaseAddress(uint64 addr)
+{
+    m_baseaddr = addr;
+}
+
+void PECOFFContext::setSubsystem(Subsystem ss)
+{
+    m_subsystem = ss;
+}
+
+void PECOFFContext::setEntryPoint(const char *symbol_name)
+{
+    m_entrypoint = symbol_name;
+}
+
+void PECOFFContext::addDLLExport(const char *symbol_name)
+{
+    m_dllexports.insert(symbol_name);
+}
+
+void PECOFFContext::addDLLImport(const char *dll_name, const char *symbol_name)
+{
+    m_dllimports[dll_name].insert(symbol_name);
+}
+
+void PECOFFContext::addLibrary(const char *filename)
+{
+    m_libraries.insert(filename);
+}
+
+std::string&            PECOFFContext::getFileName() { return m_filename; }
+Subsystem               PECOFFContext::getSubsystem() const { return m_subsystem; }
+uint64                  PECOFFContext::getBaseAddress() const { return m_baseaddr; }
+std::string&            PECOFFContext::getEntryPoint() { return m_entrypoint; }
+PECOFFContext::DLLExports&    PECOFFContext::getDLLExports() { return m_dllexports; }
+PECOFFContext::DLLImports&    PECOFFContext::getDLLImports() { return m_dllimports; }
+PECOFFContext::Libraries&     PECOFFContext::getLibraries() { return m_libraries; }
+
+bool PECOFFContext::write(const char *path, Format fmt)
 {
     {
         size_t len = strlen(path);
@@ -127,7 +135,7 @@ bool Context::write(const char *path, Format fmt)
     return write(s, fmt);
 }
 
-bool Context::write(IOutputStream &os, Format fmt)
+bool PECOFFContext::write(IOutputStream &os, Format fmt)
 {
 #define Impl(Enum, Func, Arch) case Enum: { return Func<Arch>(*this, os); }
 

@@ -29,10 +29,12 @@ typedef unsigned long long  uint64;
 
 class IOutputStream;
 class IContext;
+class IPECOFFContext;
+class IELFContext;
 class ISection;
 class StringTable;
 
-enum class Format : uint32
+enum class Format
 {
     PECOFF_x86_Obj = 0x100,
     PECOFF_x86_Exe,
@@ -51,13 +53,13 @@ enum class Format : uint32
     ELF_x64_DLL,
 };
 
-enum class Subsystem : uint32
+enum class Subsystem
 {
     CUI,
     GUI,
 };
 
-enum class SectionFlag : uint32
+enum class SectionFlag
 {
     None    = 0,
     Read    = 1 << 0,
@@ -76,19 +78,19 @@ enum class SectionFlag : uint32
     UDataSection = Read | Write | UData,
     InfoSection = Info | Remove,
 };
-inline SectionFlag operator|(SectionFlag a, SectionFlag b) { return (SectionFlag)(uint32(a) | uint32(b)); }
-inline uint32 operator&(SectionFlag a, SectionFlag b) { return (uint32(a) & uint32(b)); }
+inline SectionFlag operator|(SectionFlag a, SectionFlag b) { return (SectionFlag)(int(a) | int(b)); }
+inline int operator&(SectionFlag a, SectionFlag b) { return (int(a) & int(b)); }
 
-enum class SymbolFlag : uint32
+enum class SymbolFlag
 {
     None = 0,
     Static = 1 << 0,
     External = 1 << 1,
 };
-inline SymbolFlag operator|(SymbolFlag a, SymbolFlag b) { return (SymbolFlag)(uint32(a) | uint32(b)); }
-inline uint32 operator&(SymbolFlag a, SymbolFlag b) { return (uint32(a) & uint32(b)); }
+inline SymbolFlag operator|(SymbolFlag a, SymbolFlag b) { return (SymbolFlag)(int(a) | int(b)); }
+inline int operator&(SymbolFlag a, SymbolFlag b) { return (int(a) & int(b)); }
 
-enum class RelocationType : uint32
+enum class RelocationType
 {
     ABS,
     REL32,
@@ -144,7 +146,11 @@ public:
     virtual ISection*   findSection(const char *name) = 0;
     // flags: combination of SectionType
     virtual ISection*   createSection(const char *name, SectionFlag flags) = 0;
+};
 
+class IPECOFFContext : public IContext
+{
+public:
     // only relevant for executable
     virtual void        setBaseAddress(uint64 addr) = 0;
     // subsystem for windows. only relevant for executable
@@ -197,6 +203,7 @@ public:
 };
 
 
-bgAPI IContext* CreateContext();
+bgAPI IPECOFFContext* CreatePECOFFContext();
+bgAPI IELFContext* CreateELFContext();
 
 } // namespace bg

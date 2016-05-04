@@ -19,9 +19,9 @@ static void WriteObj_COFF_x86(bg::IOutputStream& os, Symbols& syms)
 {
     typedef uint32 intptr;
 
-    bg::IContext *ctx = bg::CreateContext();
-    bg::ISection *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
-    bg::ISection *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
+    auto *ctx = bg::CreatePECOFFContext();
+    auto *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
+    auto *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
 
     uint32 num_syms = (uint32)syms.size();
     uint8 code[10] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -45,9 +45,9 @@ static void WriteObj_COFF_x86_64(bg::IOutputStream& os, Symbols& syms)
 {
     typedef uint64 intptr;
 
-    bg::IContext *ctx = bg::CreateContext();
-    bg::ISection *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
-    bg::ISection *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
+    auto *ctx = bg::CreatePECOFFContext();
+    auto *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
+    auto *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
 
     uint32 num_syms = (uint32)syms.size();
     uint8 code[14] = {0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

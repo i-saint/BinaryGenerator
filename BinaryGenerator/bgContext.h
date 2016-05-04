@@ -1,17 +1,46 @@
 #pragma once
 namespace bg {
 
-class Context : public IContext
+class Context
 {
 public:
     Context();
-    ~Context() override;
+    virtual ~Context();
+
+    size_t      getNumSections() const;
+    Section*    getSection(size_t i);
+    Section*    findSection(const char *name);
+    // flags: combination of SectionType
+    Section*    createSection(const char *name, SectionFlag flags);
+
+public:
+    using SectionPtr     = std::unique_ptr<Section>;
+    using SymbolTablePtr = std::unique_ptr<SymbolTable>;
+    using StringTablePtr = std::unique_ptr<StringTable>;
+    using Sections       = std::vector<SectionPtr>;
+
+    Sections&       getSections();
+    SymbolTable&    getSymbolTable();
+    StringTable&    getStringTable();
+
+private:
+    Sections            m_sections;
+    SymbolTablePtr      m_sym;
+    StringTablePtr      m_str;
+};
+
+
+class PECOFFContext : public Context, public IPECOFFContext
+{
+typedef Context super;
+public:
+    PECOFFContext();
+    ~PECOFFContext() override;
     void        release() override;
 
     size_t      getNumSections() const override;
     Section*    getSection(size_t i) override;
     Section*    findSection(const char *name) override;
-    // flags: combination of SectionType
     Section*    createSection(const char *name, SectionFlag flags) override;
 
     void        setBaseAddress(uint64 addr) override;
@@ -25,18 +54,9 @@ public:
     bool        write(IOutputStream &os, Format fmt) override;
 
 public:
-    typedef std::unique_ptr<Section>        SectionPtr;
-    typedef std::unique_ptr<SymbolTable>    SymbolTablePtr;
-    typedef std::unique_ptr<StringTable>    StringTablePtr;
-    typedef std::vector<SectionPtr>         Sections;
-    typedef std::set<std::string>           DLLExports;
-    typedef std::map<
-        std::string, std::set<std::string>> DLLImports;
-    typedef std::set<std::string>           Libraries;
-
-    Sections&       getSections();
-    SymbolTable&    getSymbolTable();
-    StringTable&    getStringTable();
+    using DLLExports = std::set<std::string>;
+    using DLLImports = std::map<std::string, std::set<std::string>>;
+    using Libraries  = std::set<std::string>;
 
     std::string&    getFileName();
     Subsystem       getSubsystem() const;
@@ -47,17 +67,13 @@ public:
     Libraries&      getLibraries();
 
 private:
-    Sections            m_sections;
-    SymbolTablePtr      m_sym;
-    StringTablePtr      m_str;
-
-    std::string         m_filename;
-    uint64              m_baseaddr;
-    Subsystem           m_subsystem;
-    std::string         m_entrypoint;
-    DLLExports          m_dllexports;
-    DLLImports          m_dllimports;
-    Libraries           m_libraries;
+    std::string m_filename;
+    uint64      m_baseaddr;
+    Subsystem   m_subsystem;
+    std::string m_entrypoint;
+    DLLExports  m_dllexports;
+    DLLImports  m_dllimports;
+    Libraries   m_libraries;
 };
 
 } // namespace bg
