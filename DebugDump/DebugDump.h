@@ -31,6 +31,6 @@ struct Config
 // path: path to dll, exe, so, etc
 bool LoadImage(const char *path);
 Symbols GatherSymbols(const Config& conf);
-void WriteObj(bg::IOutputStream& os, Symbols& syms, bg::Format fmt);
+void WriteObj(bg::IOutputStream& os, Symbols& syms, bg::Architecture arch);
 
 } // namespace dd

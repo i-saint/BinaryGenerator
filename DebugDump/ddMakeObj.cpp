@@ -19,7 +19,7 @@ static void WriteObj_COFF_x86(bg::IOutputStream& os, Symbols& syms)
 {
     typedef uint32 intptr;
 
-    auto *ctx = bg::CreatePECOFFContext();
+    auto *ctx = bg::CreatePECOFFContext(bg::Architecture::x86);
     auto *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
     auto *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
 
@@ -37,15 +37,15 @@ static void WriteObj_COFF_x86(bg::IOutputStream& os, Symbols& syms)
     auto exports = MakeExportDirective(syms);
     directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
-    ctx->write(os, bg::Format::PECOFF_x86_Obj);
+    ctx->writeObj(os);
     ctx->release();
 }
 
-static void WriteObj_COFF_x86_64(bg::IOutputStream& os, Symbols& syms)
+static void WriteObj_COFF_x64(bg::IOutputStream& os, Symbols& syms)
 {
     typedef uint64 intptr;
 
-    auto *ctx = bg::CreatePECOFFContext();
+    auto *ctx = bg::CreatePECOFFContext(bg::Architecture::x64);
     auto *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
     auto *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
 
@@ -63,18 +63,18 @@ static void WriteObj_COFF_x86_64(bg::IOutputStream& os, Symbols& syms)
     auto exports = MakeExportDirective(syms);
     directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
-    ctx->write(os, bg::Format::PECOFF_x64_Obj);
+    ctx->writeObj(os);
     ctx->release();
 }
 
-void WriteObj(bg::IOutputStream& os, Symbols& syms, bg::Format fmt)
+void WriteObj(bg::IOutputStream& os, Symbols& syms, bg::Architecture arch)
 {
-    switch (fmt) {
-    case bg::Format::PECOFF_x86_Obj:
+    switch (arch) {
+    case bg::Architecture::x86:
         WriteObj_COFF_x86(os, syms);
         break;
-    case bg::Format::PECOFF_x64_Obj:
-        WriteObj_COFF_x86_64(os, syms);
+    case bg::Architecture::x64:
+        WriteObj_COFF_x64(os, syms);
         break;
     }
 }

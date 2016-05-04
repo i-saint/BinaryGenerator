@@ -4,7 +4,7 @@ namespace bg {
 class Context
 {
 public:
-    Context();
+    Context(Architecture arch);
     virtual ~Context();
 
     size_t      getNumSections() const;
@@ -23,7 +23,8 @@ public:
     SymbolTable&    getSymbolTable();
     StringTable&    getStringTable();
 
-private:
+protected:
+    Architecture        m_arch;
     Sections            m_sections;
     SymbolTablePtr      m_sym;
     StringTablePtr      m_str;
@@ -34,7 +35,7 @@ class PECOFFContext : public Context, public IPECOFFContext
 {
 typedef Context super;
 public:
-    PECOFFContext();
+    PECOFFContext(Architecture arch);
     ~PECOFFContext() override;
     void        release() override;
 
@@ -50,8 +51,12 @@ public:
     void        addDLLImport(const char *dll_name, const char *symbol_name) override;
     void        addLibrary(const char *filename) override;
 
-    bool        write(const char *path, Format fmt) override;
-    bool        write(IOutputStream &os, Format fmt) override;
+    bool        writeObj(const char *path) override;
+    bool        writeExe(const char *path) override;
+    bool        writeDLL(const char *path) override;
+    bool        writeObj(IOutputStream &os) override;
+    bool        writeExe(IOutputStream &os) override;
+    bool        writeDLL(IOutputStream &os) override;
 
 public:
     using DLLExports = std::set<std::string>;

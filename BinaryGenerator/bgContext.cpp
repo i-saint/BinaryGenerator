@@ -4,9 +4,9 @@
 
 namespace bg {
 
-bgAPI IPECOFFContext* CreatePECOFFContext()
+bgAPI IPECOFFContext* CreatePECOFFContext(Architecture arch)
 {
-    return new PECOFFContext();
+    return new PECOFFContext(arch);
 }
 
 class StdOutputStream : public IOutputStream
@@ -20,8 +20,9 @@ public:
     std::ostream& m_os;
 };
 
-Context::Context()
-    : m_sym(new SymbolTable(this))
+Context::Context(Architecture arch)
+    : m_arch(arch)
+    , m_sym(new SymbolTable(this))
     , m_str(new StringTable(this))
 {
 }
@@ -66,8 +67,9 @@ SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
 
 
-PECOFFContext::PECOFFContext()
-    : m_baseaddr()
+PECOFFContext::PECOFFContext(Architecture arch)
+    : super(arch)
+    , m_baseaddr()
     , m_subsystem(Subsystem::GUI)
 {
 }
@@ -119,47 +121,65 @@ PECOFFContext::DLLExports&    PECOFFContext::getDLLExports() { return m_dllexpor
 PECOFFContext::DLLImports&    PECOFFContext::getDLLImports() { return m_dllimports; }
 PECOFFContext::Libraries&     PECOFFContext::getLibraries() { return m_libraries; }
 
-bool PECOFFContext::write(const char *path, Format fmt)
+static const char* GetFilename(const char *path)
 {
-    {
-        size_t len = strlen(path);
-        size_t separator = 0;
-        for (size_t i = 0; i < len; ++i) {
-            if (path[i] == '/' || path[i] == '\\') { separator = i + 1; }
-        }
-        m_filename = path + separator;
+    size_t len = strlen(path);
+    size_t separator = 0;
+    for (size_t i = 0; i < len; ++i) {
+        if (path[i] == '/' || path[i] == '\\') { separator = i + 1; }
     }
+    return path + separator;
+}
 
+bool PECOFFContext::writeObj(const char *path)
+{
+    m_filename = GetFilename(path);
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     StdOutputStream s(ofs);
-    return write(s, fmt);
+    return writeObj(s);
+}
+bool PECOFFContext::writeExe(const char *path)
+{
+    m_filename = GetFilename(path);
+    std::fstream ofs(path, std::ios::binary | std::ios::out);
+    StdOutputStream s(ofs);
+    return writeExe(s);
+}
+bool PECOFFContext::writeDLL(const char *path)
+{
+    m_filename = GetFilename(path);
+    std::fstream ofs(path, std::ios::binary | std::ios::out);
+    StdOutputStream s(ofs);
+    return writeDLL(s);
 }
 
-bool PECOFFContext::write(IOutputStream &os, Format fmt)
+#define Impl(Func)\
+    switch (m_arch) {\
+    case Architecture::x86:\
+        return Func<Arch_x86>(*this, os);\
+        break;\
+    case Architecture::x64:\
+        return Func<Arch_x64>(*this, os);\
+        break;\
+    }\
+    return false;
+
+
+bool PECOFFContext::writeObj(IOutputStream &os)
 {
-#define Impl(Enum, Func, Arch) case Enum: { return Func<Arch>(*this, os); }
+    Impl(PECOFFWriteObj);
+}
 
-    switch (fmt) {
-        Impl(Format::PECOFF_x86_Obj, PECOFFWriteObj, Arch_x86);
-        Impl(Format::PECOFF_x86_Exe, PECOFFWriteExe, Arch_x86);
-        Impl(Format::PECOFF_x86_DLL, PECOFFWriteDLL, Arch_x86);
+bool PECOFFContext::writeExe(IOutputStream &os)
+{
+    Impl(PECOFFWriteExe);
+}
 
-        Impl(Format::PECOFF_x64_Obj, PECOFFWriteObj, Arch_x64);
-        Impl(Format::PECOFF_x64_Exe, PECOFFWriteExe, Arch_x64);
-        Impl(Format::PECOFF_x64_DLL, PECOFFWriteDLL, Arch_x64);
-
-        Impl(Format::ELF_x86_Obj, ELFWriteObj, Arch_x86);
-        Impl(Format::ELF_x86_Exe, ELFWriteExe, Arch_x86);
-        Impl(Format::ELF_x86_DLL, ELFWriteDLL, Arch_x86);
-
-        Impl(Format::ELF_x64_Obj, ELFWriteObj, Arch_x64);
-        Impl(Format::ELF_x64_Exe, ELFWriteExe, Arch_x64);
-        Impl(Format::ELF_x64_DLL, ELFWriteDLL, Arch_x64);
-    }
+bool PECOFFContext::writeDLL(IOutputStream &os)
+{
+    Impl(PECOFFWriteDLL);
+}
 
 #undef Impl
-
-    return false;
-}
 
 } // namespace bg

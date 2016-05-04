@@ -34,23 +34,11 @@ class IELFContext;
 class ISection;
 class StringTable;
 
-enum class Format
+enum class Architecture
 {
-    PECOFF_x86_Obj = 0x100,
-    PECOFF_x86_Exe,
-    PECOFF_x86_DLL,
-
-    PECOFF_x64_Obj = 0x200,
-    PECOFF_x64_Exe,
-    PECOFF_x64_DLL,
-
-    ELF_x86_Obj = 0x300,
-    ELF_x86_Exe,
-    ELF_x86_DLL,
-
-    ELF_x64_Obj = 0x400,
-    ELF_x64_Exe,
-    ELF_x64_DLL,
+    x86,
+    x64,
+    x86_64 = x64,
 };
 
 enum class Subsystem
@@ -163,8 +151,12 @@ public:
     // add library dependency. only relevant for non-executable
     virtual void        addLibrary(const char *filename) = 0;
 
-    virtual bool        write(const char *path, Format fmt) = 0;
-    virtual bool        write(IOutputStream &os, Format fmt) = 0;
+    virtual bool        writeObj(const char *path) = 0;
+    virtual bool        writeExe(const char *path) = 0;
+    virtual bool        writeDLL(const char *path) = 0;
+    virtual bool        writeObj(IOutputStream &os) = 0;
+    virtual bool        writeExe(IOutputStream &os) = 0;
+    virtual bool        writeDLL(IOutputStream &os) = 0;
 };
 
 
@@ -203,7 +195,7 @@ public:
 };
 
 
-bgAPI IPECOFFContext* CreatePECOFFContext();
-bgAPI IELFContext* CreateELFContext();
+bgAPI IPECOFFContext* CreatePECOFFContext(Architecture arch);
+bgAPI IELFContext* CreateELFContext(Architecture arch);
 
 } // namespace bg
