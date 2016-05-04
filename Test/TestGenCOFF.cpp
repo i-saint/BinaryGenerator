@@ -8,13 +8,13 @@ void Generate_COFF_x86()
     const char name[] = "_SayHello";
 
     bg::IContext *ctx = bg::CreateContext();
-    bg::ISection *text = ctx->createSection(".text", bg::SectionType_Text);
+    bg::ISection *text = ctx->createSection(".text", bg::SectionFlag::TextSection);
     bg::Symbol sym_str  = text->addStaticSymbol(string, sizeof(string), "$hello");
     bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), name);
-    text->addRelocation(sym_code.addr + 1, "$hello", bg::RelocationType_ADDR32);
-    text->addRelocation(sym_code.addr + 6, "_puts", bg::RelocationType_REL32);
+    text->addRelocation(sym_code.addr + 1, "$hello", bg::RelocationType::ADDR32);
+    text->addRelocation(sym_code.addr + 6, "_puts", bg::RelocationType::REL32);
 
-    ctx->write("SayHello_x86.obj", bg::Format_PECOFF_x86_Obj);
+    ctx->write("SayHello_x86.obj", bg::Format::PECOFF_x86_Obj);
     ctx->release();
 }
 
@@ -26,13 +26,13 @@ void Generate_COFF_x64()
     const char name[] = "SayHello";
 
     bg::IContext *ctx = bg::CreateContext();
-    bg::ISection *text = ctx->createSection(".text", bg::SectionType_Text);
+    bg::ISection *text = ctx->createSection(".text", bg::SectionFlag::TextSection);
     bg::Symbol sym_str  = text->addStaticSymbol(string, sizeof(string), "$hello");
     bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), name);
-    text->addRelocation(sym_code.addr + 3, "$hello", bg::RelocationType_REL32);
-    text->addRelocation(sym_code.addr + 8, "puts", bg::RelocationType_REL32);
+    text->addRelocation(sym_code.addr + 3, "$hello", bg::RelocationType::REL32);
+    text->addRelocation(sym_code.addr + 8, "puts", bg::RelocationType::REL32);
 
-    ctx->write("SayHello_x64.obj", bg::Format_PECOFF_x64_Obj);
+    ctx->write("SayHello_x64.obj", bg::Format::PECOFF_x64_Obj);
     ctx->release();
 }
 
@@ -43,13 +43,13 @@ void Generate_PE_x86()
     const char name[] = "_SayHello";
 
     bg::IContext *ctx = bg::CreateContext();
-    bg::ISection *text = ctx->createSection(".text", bg::SectionType_Text);
+    bg::ISection *text = ctx->createSection(".text", bg::SectionFlag::TextSection);
     text->addExternalSymbol(code, sizeof(code), name);
     ctx->setEntryPoint(name);
     ctx->addDLLExport(name);
 
-    ctx->write("SayHello_x86.exe", bg::Format_PECOFF_x86_Exe);
-    ctx->write("SayHello_x86.dll", bg::Format_PECOFF_x86_DLL);
+    ctx->write("SayHello_x86.exe", bg::Format::PECOFF_x86_Exe);
+    ctx->write("SayHello_x86.dll", bg::Format::PECOFF_x86_DLL);
     ctx->release();
 }
 
@@ -61,13 +61,13 @@ void Generate_PE_x64()
     const char name[] = "SayHello";
 
     bg::IContext *ctx = bg::CreateContext();
-    bg::ISection *text = ctx->createSection(".text", bg::SectionType_Text);
+    bg::ISection *text = ctx->createSection(".text", bg::SectionFlag::TextSection);
     text->addExternalSymbol(code, sizeof(code), name);
     ctx->setEntryPoint(name);
     ctx->addDLLExport(name);
 
-    ctx->write("SayHello_x64.exe", bg::Format_PECOFF_x64_Exe);
-    ctx->write("SayHello_x64.dll", bg::Format_PECOFF_x64_DLL);
+    ctx->write("SayHello_x64.exe", bg::Format::PECOFF_x64_Exe);
+    ctx->write("SayHello_x64.dll", bg::Format::PECOFF_x64_DLL);
     ctx->release();
 }
 

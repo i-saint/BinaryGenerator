@@ -12,6 +12,6 @@ int main(int argc, char *argv[])
 #elif _M_AMD64
     auto mod = LoadLibraryA("SayHello_x64.dll");
 #endif
-    auto* f = GetProcAddress(mod, "SayHello");
+    auto* f = (SayHelloT)GetProcAddress(mod, "SayHello");
     f();
 }

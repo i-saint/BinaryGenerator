@@ -4,15 +4,15 @@ namespace bg {
 class Section : public ISection
 {
 public:
-    Section(Context *ctx, const char *name, uint32 index, uint32 flags);
+    Section(Context *ctx, const char *name, uint32 index, SectionFlag flags);
     ~Section() override;
 
     // return position of added data
     uint32 addData(const void *data, size_t len) override;
     // add data and symbol
-    Symbol addSymbol(const void *data, size_t len, const char *name, uint32 flags) override;
+    Symbol addSymbol(const void *data, size_t len, const char *name, SymbolFlag flags) override;
     // add symbol only
-    Symbol addSymbol(uint32 pos, const char *name, uint32 flags) override;
+    Symbol addSymbol(uint32 pos, const char *name, SymbolFlag flags) override;
     // add undef symbol
     Symbol addUndefinedSymbol(const char *name) override;
 
@@ -21,7 +21,7 @@ public:
 
     const char* getName() const override;
     uint32      getIndex() const override;
-    uint32      getFlags() const override;
+    SectionFlag getFlags() const override;
     uint32      getVirtualAddress() const override;
     uint32      getSize() const override;
     char*       getData() override;
@@ -36,7 +36,7 @@ private:
     Context *m_ctx;
     char m_name[8];
     uint32 m_index;
-    uint32 m_flags;
+    SectionFlag m_flags;
     uint32 m_virtual_addr;
     std::string m_data;
     Relocations m_reloc;

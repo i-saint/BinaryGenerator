@@ -41,7 +41,7 @@ struct PECOFFImpl : public PECOFFTypes<Arch>
     using typename PECOFFTypes<Arch>::intptr;
 
     WORD getMachineType();
-    uint32 translateSectionFlags(uint32 flags, bool executable);
+    uint32 translateSectionFlags(SectionFlag flags, bool executable);
     uint32 translateRelocationType(RelocationType rel);
     uint32 buildSectionHeader(IMAGE_SECTION_HEADER& sh, Section& sec, uint32 pos, uint32 al, bool executable);
     uint32 align(uint32 pos, uint32 al);
@@ -100,38 +100,38 @@ template<> WORD PECOFFImpl<Arch_x64>::getMachineType() { return IMAGE_FILE_MACHI
 
 
 template<class Arch>
-uint32 PECOFFImpl<Arch>::translateSectionFlags(uint32 flags, bool executable)
+uint32 PECOFFImpl<Arch>::translateSectionFlags(SectionFlag flags, bool executable)
 {
     uint32 r = 0;
-    if ((flags & SectionFlag_Code)) {
+    if ((flags & SectionFlag::Code)) {
         r |= IMAGE_SCN_CNT_CODE;
         if (!executable) { r |= IMAGE_SCN_ALIGN_16BYTES; }
     }
-    if ((flags & SectionFlag_IData)) {
+    if ((flags & SectionFlag::IData)) {
         r |= IMAGE_SCN_CNT_INITIALIZED_DATA;
         if (!executable) { r |= IMAGE_SCN_ALIGN_16BYTES; }
     }
-    if ((flags & SectionFlag_UData)) {
+    if ((flags & SectionFlag::UData)) {
         r |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;
         if (!executable) { r |= IMAGE_SCN_ALIGN_16BYTES; }
     }
-    if ((flags & SectionFlag_Info)) {
+    if ((flags & SectionFlag::Info)) {
         r |= IMAGE_SCN_LNK_INFO;
         if (!executable) { r |= IMAGE_SCN_ALIGN_1BYTES; }
     }
-    if ((flags & SectionFlag_Read)) {
+    if ((flags & SectionFlag::Read)) {
         r |= IMAGE_SCN_MEM_READ;
     }
-    if ((flags & SectionFlag_Write)) {
+    if ((flags & SectionFlag::Write)) {
         r |= IMAGE_SCN_MEM_WRITE;
     }
-    if ((flags & SectionFlag_Execute)) {
+    if ((flags & SectionFlag::Execute)) {
         r |= IMAGE_SCN_MEM_EXECUTE;
     }
-    if ((flags & SectionFlag_Shared)) {
+    if ((flags & SectionFlag::Shared)) {
         r |= IMAGE_SCN_MEM_SHARED;
     }
-    if ((flags & SectionFlag_Remove)) {
+    if ((flags & SectionFlag::Remove)) {
         r |= IMAGE_SCN_LNK_REMOVE;
     }
     return r;
@@ -141,11 +141,11 @@ template<>
 uint32 PECOFFImpl<Arch_x86>::translateRelocationType(RelocationType rel)
 {
     switch (rel) {
-    case RelocationType_ABS:        return IMAGE_REL_I386_ABSOLUTE;
-    case RelocationType_REL32:      return IMAGE_REL_I386_REL32;
-    case RelocationType_ADDR32:     return IMAGE_REL_I386_DIR32;
-    case RelocationType_ADDR32NB:   return IMAGE_REL_I386_DIR32NB;
-    case RelocationType_ADDR64:     break;
+    case RelocationType::ABS:       return IMAGE_REL_I386_ABSOLUTE;
+    case RelocationType::REL32:     return IMAGE_REL_I386_REL32;
+    case RelocationType::ADDR32:    return IMAGE_REL_I386_DIR32;
+    case RelocationType::ADDR32NB:  return IMAGE_REL_I386_DIR32NB;
+    case RelocationType::ADDR64:    break;
     }
     return 0;
 }
@@ -154,11 +154,11 @@ template<>
 uint32 PECOFFImpl<Arch_x64>::translateRelocationType(RelocationType rel)
 {
     switch (rel) {
-    case RelocationType_ABS:        return IMAGE_REL_AMD64_ABSOLUTE;
-    case RelocationType_REL32:      return IMAGE_REL_AMD64_REL32;
-    case RelocationType_ADDR32:     return IMAGE_REL_AMD64_ADDR32;
-    case RelocationType_ADDR32NB:   return IMAGE_REL_AMD64_ADDR32NB;
-    case RelocationType_ADDR64:     return IMAGE_REL_AMD64_ADDR64;
+    case RelocationType::ABS:       return IMAGE_REL_AMD64_ABSOLUTE;
+    case RelocationType::REL32:     return IMAGE_REL_AMD64_REL32;
+    case RelocationType::ADDR32:    return IMAGE_REL_AMD64_ADDR32;
+    case RelocationType::ADDR32NB:  return IMAGE_REL_AMD64_ADDR32NB;
+    case RelocationType::ADDR64:    return IMAGE_REL_AMD64_ADDR64;
     }
     return 0;
 }
@@ -256,10 +256,10 @@ bool PECOFFWriter<Arch>::writeObj()
         isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : IMAGE_SYM_UNDEFINED;
         isym.Type = IMAGE_SYM_TYPE_NULL;
         isym.StorageClass = IMAGE_SYM_CLASS_NULL;
-        if ((sym.flags & SymbolFlag_Static)) {
+        if ((sym.flags & SymbolFlag::Static)) {
             isym.StorageClass = IMAGE_SYM_CLASS_STATIC;
         }
-        if ((sym.flags & SymbolFlag_External)) {
+        if ((sym.flags & SymbolFlag::External)) {
             isym.StorageClass = IMAGE_SYM_CLASS_EXTERNAL;
         }
         isym.NumberOfAuxSymbols = 0;
@@ -354,7 +354,7 @@ template<class Arch>
 bool PECOFFWriter<Arch>::writePE(bool is_dll)
 {
     auto& sections = m_ctx.getSections();
-    m_internal_section.reset(new Section(&m_ctx, ".intrnl", (uint32)sections.size(), SectionType_IData));
+    m_internal_section.reset(new Section(&m_ctx, ".intrnl", (uint32)sections.size(), SectionFlag::IData));
     size_t num_sections = sections.size() + 1;
 
     IMAGE_DOS_HEADER dos_header;
@@ -453,10 +453,10 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
         oh.SizeOfHeaders = align(pos_sections, file_align);
 
         switch (m_ctx.getSubsystem()) {
-        case Subsystem_CUI:
+        case Subsystem::CUI:
             oh.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_CUI;
             break;
-        case Subsystem_GUI:
+        case Subsystem::GUI:
             oh.Subsystem = IMAGE_SUBSYSTEM_WINDOWS_GUI;
             break;
         }

@@ -32,61 +32,69 @@ class IContext;
 class ISection;
 class StringTable;
 
-enum Format {
-    Format_PECOFF_x86_Obj = 0x100,
-    Format_PECOFF_x86_Exe,
-    Format_PECOFF_x86_DLL,
-
-    Format_PECOFF_x64_Obj = 0x200,
-    Format_PECOFF_x64_Exe,
-    Format_PECOFF_x64_DLL,
-
-    Format_ELF_x86_Obj = 0x300,
-    Format_ELF_x86_Exe,
-    Format_ELF_x86_DLL,
-
-    Format_ELF_x64_Obj = 0x400,
-    Format_ELF_x64_Exe,
-    Format_ELF_x64_DLL,
-};
-
-enum Subsystem {
-    Subsystem_CUI,
-    Subsystem_GUI,
-};
-
-enum SectionFlag {
-    SectionFlag_None    = 0,
-    SectionFlag_Read    = 1 << 0,
-    SectionFlag_Write   = 1 << 1,
-    SectionFlag_Execute = 1 << 2,
-    SectionFlag_Shared  = 1 << 3,
-    SectionFlag_Code    = 1 << 4,
-    SectionFlag_IData   = 1 << 5,
-    SectionFlag_UData   = 1 << 6,
-    SectionFlag_Info    = 1 << 7,
-    SectionFlag_Remove  = 1 << 8,
-
-    SectionType_Text    = SectionFlag_Read | SectionFlag_Execute | SectionFlag_Code,
-    SectionType_TextX   = SectionFlag_Read | SectionFlag_Write | SectionFlag_Execute | SectionFlag_Code,
-    SectionType_IData   = SectionFlag_Read | SectionFlag_IData,
-    SectionType_UData   = SectionFlag_Read | SectionFlag_Write | SectionFlag_UData,
-    SectionType_Info    = SectionFlag_Info | SectionFlag_Remove,
-};
-
-enum SymbolFlag {
-    SymbolFlag_None     = 0,
-    SymbolFlag_Static   = 1 << 0,
-    SymbolFlag_External = 1 << 1,
-};
-
-enum RelocationType
+enum class Format : uint32
 {
-    RelocationType_ABS,
-    RelocationType_REL32,
-    RelocationType_ADDR32,
-    RelocationType_ADDR32NB,
-    RelocationType_ADDR64,
+    PECOFF_x86_Obj = 0x100,
+    PECOFF_x86_Exe,
+    PECOFF_x86_DLL,
+
+    PECOFF_x64_Obj = 0x200,
+    PECOFF_x64_Exe,
+    PECOFF_x64_DLL,
+
+    ELF_x86_Obj = 0x300,
+    ELF_x86_Exe,
+    ELF_x86_DLL,
+
+    ELF_x64_Obj = 0x400,
+    ELF_x64_Exe,
+    ELF_x64_DLL,
+};
+
+enum class Subsystem : uint32
+{
+    CUI,
+    GUI,
+};
+
+enum class SectionFlag : uint32
+{
+    None    = 0,
+    Read    = 1 << 0,
+    Write   = 1 << 1,
+    Execute = 1 << 2,
+    Shared  = 1 << 3,
+    Code    = 1 << 4,
+    IData   = 1 << 5,
+    UData   = 1 << 6,
+    Info    = 1 << 7,
+    Remove  = 1 << 8,
+
+    TextSection = Read | Execute | Code,
+    TextXSection = Read | Write | Execute | Code,
+    IDataSection = Read | IData,
+    UDataSection = Read | Write | UData,
+    InfoSection = Info | Remove,
+};
+inline SectionFlag operator|(SectionFlag a, SectionFlag b) { return (SectionFlag)(uint32(a) | uint32(b)); }
+inline uint32 operator&(SectionFlag a, SectionFlag b) { return (uint32(a) & uint32(b)); }
+
+enum class SymbolFlag : uint32
+{
+    None = 0,
+    Static = 1 << 0,
+    External = 1 << 1,
+};
+inline SymbolFlag operator|(SymbolFlag a, SymbolFlag b) { return (SymbolFlag)(uint32(a) | uint32(b)); }
+inline uint32 operator&(SymbolFlag a, SymbolFlag b) { return (uint32(a) & uint32(b)); }
+
+enum class RelocationType : uint32
+{
+    ABS,
+    REL32,
+    ADDR32,
+    ADDR32NB,
+    ADDR64,
 };
 
 struct String
@@ -103,7 +111,7 @@ struct Symbol
     ISection    *section;
     uint32      index;
     uint32      addr;
-    uint32      flags; // combination of SymbolFlags
+    SymbolFlag  flags; // combination of SymbolFlags
     String      name;
 };
 
@@ -135,7 +143,7 @@ public:
     virtual ISection*   getSection(size_t i) = 0;
     virtual ISection*   findSection(const char *name) = 0;
     // flags: combination of SectionType
-    virtual ISection*   createSection(const char *name, uint32 flags) = 0;
+    virtual ISection*   createSection(const char *name, SectionFlag flags) = 0;
 
     // only relevant for executable
     virtual void        setBaseAddress(uint64 addr) = 0;
@@ -162,17 +170,17 @@ public:
     // add data and return position of added data. data can be null
     virtual uint32 addData(const void *data, size_t len) = 0;
     // add data and symbol. data can be null
-    virtual Symbol addSymbol(const void *data, size_t len, const char *name, uint32 flags) = 0;
+    virtual Symbol addSymbol(const void *data, size_t len, const char *name, SymbolFlag flags) = 0;
     // add symbol only
-    virtual Symbol addSymbol(uint32 pos, const char *name, uint32 flags) = 0;
+    virtual Symbol addSymbol(uint32 pos, const char *name, SymbolFlag flags) = 0;
     // add undef symbol
     virtual Symbol addUndefinedSymbol(const char *name) = 0;
 
     // utilities
-    Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_Static); }
-    Symbol addExternalSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag_External); }
-    Symbol addStaticSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag_Static); }
-    Symbol addExternalSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag_External); }
+    Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag::Static); }
+    Symbol addExternalSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag::External); }
+    Symbol addStaticSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag::Static); }
+    Symbol addExternalSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag::External); }
 
     // if symbol with name symbol_name doesn't exist, it will be added as undefined symbol
     virtual Relocation  addRelocation(uint32 pos, const char *symbol_name, RelocationType type) = 0;
@@ -180,7 +188,7 @@ public:
 
     virtual const char* getName() const = 0;
     virtual uint32      getIndex() const = 0;
-    virtual uint32      getFlags() const = 0;
+    virtual SectionFlag getFlags() const = 0;
     virtual uint32      getVirtualAddress() const = 0;
     virtual uint32      getSize() const = 0;
     virtual char*       getData() = 0;

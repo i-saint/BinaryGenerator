@@ -24,7 +24,7 @@ Context::Context()
     : m_sym(new SymbolTable(this))
     , m_str(new StringTable(this))
     , m_baseaddr()
-    , m_subsystem(Subsystem_GUI)
+    , m_subsystem(Subsystem::GUI)
 {
 }
 
@@ -57,7 +57,7 @@ Section* Context::findSection(const char *name)
     return nullptr;
 }
 
-Section* Context::createSection(const char *name, uint32 flags)
+Section* Context::createSection(const char *name, SectionFlag flags)
 {
     if (Section* f = findSection(name)) {
         return f;
@@ -132,21 +132,21 @@ bool Context::write(IOutputStream &os, Format fmt)
 #define Impl(Enum, Func, Arch) case Enum: { return Func<Arch>(*this, os); }
 
     switch (fmt) {
-        Impl(Format_PECOFF_x86_Obj, PECOFFWriteObj, Arch_x86);
-        Impl(Format_PECOFF_x86_Exe, PECOFFWriteExe, Arch_x86);
-        Impl(Format_PECOFF_x86_DLL, PECOFFWriteDLL, Arch_x86);
+        Impl(Format::PECOFF_x86_Obj, PECOFFWriteObj, Arch_x86);
+        Impl(Format::PECOFF_x86_Exe, PECOFFWriteExe, Arch_x86);
+        Impl(Format::PECOFF_x86_DLL, PECOFFWriteDLL, Arch_x86);
 
-        Impl(Format_PECOFF_x64_Obj, PECOFFWriteObj, Arch_x64);
-        Impl(Format_PECOFF_x64_Exe, PECOFFWriteExe, Arch_x64);
-        Impl(Format_PECOFF_x64_DLL, PECOFFWriteDLL, Arch_x64);
+        Impl(Format::PECOFF_x64_Obj, PECOFFWriteObj, Arch_x64);
+        Impl(Format::PECOFF_x64_Exe, PECOFFWriteExe, Arch_x64);
+        Impl(Format::PECOFF_x64_DLL, PECOFFWriteDLL, Arch_x64);
 
-        Impl(Format_ELF_x86_Obj, ELFWriteObj, Arch_x86);
-        Impl(Format_ELF_x86_Exe, ELFWriteExe, Arch_x86);
-        Impl(Format_ELF_x86_DLL, ELFWriteDLL, Arch_x86);
+        Impl(Format::ELF_x86_Obj, ELFWriteObj, Arch_x86);
+        Impl(Format::ELF_x86_Exe, ELFWriteExe, Arch_x86);
+        Impl(Format::ELF_x86_DLL, ELFWriteDLL, Arch_x86);
 
-        Impl(Format_ELF_x64_Obj, ELFWriteObj, Arch_x64);
-        Impl(Format_ELF_x64_Exe, ELFWriteExe, Arch_x64);
-        Impl(Format_ELF_x64_DLL, ELFWriteDLL, Arch_x64);
+        Impl(Format::ELF_x64_Obj, ELFWriteObj, Arch_x64);
+        Impl(Format::ELF_x64_Exe, ELFWriteExe, Arch_x64);
+        Impl(Format::ELF_x64_DLL, ELFWriteDLL, Arch_x64);
     }
 
 #undef Impl

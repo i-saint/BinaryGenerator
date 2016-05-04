@@ -3,7 +3,7 @@
 
 namespace bg {
 
-Section::Section(Context *ctx, const char *name, uint32 index, uint32 flags)
+Section::Section(Context *ctx, const char *name, uint32 index, SectionFlag flags)
     : m_ctx(ctx)
     , m_index(index)
     , m_flags(flags)
@@ -30,12 +30,12 @@ uint32 Section::addData(const void *data, size_t len)
     return pos;
 }
 
-Symbol Section::addSymbol(const void *data, size_t len, const char *name, uint32 flags)
+Symbol Section::addSymbol(const void *data, size_t len, const char *name, SymbolFlag flags)
 {
     return addSymbol(addData(data, len), name, flags);
 }
 
-Symbol Section::addSymbol(uint32 addr, const char *name, uint32 flags)
+Symbol Section::addSymbol(uint32 addr, const char *name, SymbolFlag flags)
 {
     auto ret = Symbol();
     ret.section = this;
@@ -52,7 +52,7 @@ Symbol Section::addUndefinedSymbol(const char *name)
     ret.section = nullptr;
     ret.index = 0;
     ret.addr = 0;
-    ret.flags = SymbolFlag_External;
+    ret.flags = SymbolFlag::External;
     ret.name = m_ctx->getStringTable().addString(name);
     return m_ctx->getSymbolTable().addSymbol(ret);
 }
@@ -75,7 +75,7 @@ Relocation Section::addRelocation(uint32 pos, uint32 symbol_index, RelocationTyp
 
 const char* Section::getName() const { return m_name; }
 uint32 Section::getIndex() const { return m_index; }
-uint32 Section::getFlags() const { return m_flags; }
+SectionFlag Section::getFlags() const { return m_flags; }
 uint32 Section::getVirtualAddress() const { return m_virtual_addr; }
 
 uint32 Section::getSize() const { return (uint32)m_data.size(); }
