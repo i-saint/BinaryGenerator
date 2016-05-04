@@ -10,6 +10,7 @@ bool File2Obj(
     const char *path_to_input,
     const char *path_to_obj,
     const char *symbol_name,
+    bg::SectionFlag flags,
     bg::Architecture arch,
     bg::Format fmt);
 
