@@ -370,7 +370,6 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
     uint32 section_align = 0x1000;
     uint32 file_align = 0x200; // must be 512 - 64k
     uint32 image_size = 0;
-    uint32 entry_point = m_ctx.getSymbolTable().getVirtualAddress(m_ctx.getEntryPoint().c_str());
     uint32 pos_sections = uint32(
         sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + IMAGE_SIZEOF_SECTION_HEADER * num_sections);
 
@@ -440,7 +439,7 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
         oh.SizeOfCode;              // can be omitted
         oh.SizeOfInitializedData;   // 
         oh.SizeOfUninitializedData; // 
-        oh.AddressOfEntryPoint = entry_point;
+        oh.AddressOfEntryPoint = m_ctx.getSymbolTable().getVirtualAddress(m_ctx.getEntryPoint().c_str());
         oh.BaseOfCode = section_align;
         oh.ImageBase = (intptr)m_ctx.getBaseAddress();
         oh.SectionAlignment = section_align;
