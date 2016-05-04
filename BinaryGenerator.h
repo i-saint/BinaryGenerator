@@ -41,10 +41,10 @@ enum class Architecture
     x86_64 = x64,
 };
 
-enum class Subsystem
+enum class Format
 {
-    CUI,
-    GUI,
+    PECOFF,
+    ELF,
 };
 
 enum class SectionFlag
@@ -86,6 +86,13 @@ enum class RelocationType
     ADDR32NB,
     ADDR64,
 };
+
+enum class Subsystem
+{
+    CUI,
+    GUI,
+};
+
 
 struct String
 {
