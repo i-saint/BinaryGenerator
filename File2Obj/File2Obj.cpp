@@ -64,12 +64,13 @@ bool File2Obj(
 
         auto ofs = std::ofstream(path_h.c_str(), std::ios::out | std::ios::binary);
         if (ofs) {
-            std::string header;
-            header += "extern \"C\" {\n";
-            header += "    extern const char *"; header += sym_name; header += ";\n";
-            header += "    extern unsigned int "; header += size_name; header += ";\n";
-            header += "}\n";
-            ofs << header;
+            char buf[2048];
+            sprintf(buf,
+                "extern \"C\" {\n"
+                "    extern const char %s[0x%x];\n"
+                "    extern const unsigned int %s;\n"
+                "}", sym_name, size, size_name.c_str());
+            ofs << buf;
 
             printf("generated %s\n", path_h.c_str());
         }
