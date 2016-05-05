@@ -1,7 +1,8 @@
 #pragma once
 namespace fdn {
 
-const char* GetFilename(const char *path);
+const char* GetFileName(const char *path);
+const char* GetFileExt(const char *path);
 size_t GetFileSize(const char *path);
 size_t ReadFile(const char *path, void *dst, size_t dst_size);
 

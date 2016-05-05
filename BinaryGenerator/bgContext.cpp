@@ -138,21 +138,21 @@ PECOFFContext::Libraries&     PECOFFContext::getLibraries() { return m_libraries
 
 bool PECOFFContext::writeObj(const char *path)
 {
-    m_filename = GetFilename(path);
+    m_filename = GetFileName(path);
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     StdOutputStream s(ofs);
     return writeObj(s);
 }
 bool PECOFFContext::writeExe(const char *path)
 {
-    m_filename = GetFilename(path);
+    m_filename = GetFileName(path);
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     StdOutputStream s(ofs);
     return writeExe(s);
 }
 bool PECOFFContext::writeDLL(const char *path)
 {
-    m_filename = GetFilename(path);
+    m_filename = GetFileName(path);
     std::fstream ofs(path, std::ios::binary | std::ios::out);
     StdOutputStream s(ofs);
     return writeDLL(s);

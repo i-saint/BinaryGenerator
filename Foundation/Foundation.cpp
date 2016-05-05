@@ -2,14 +2,27 @@
 #include "Foundation.h"
 namespace fdn {
 
-const char* GetFilename(const char *path)
+const char* GetFileName(const char *path)
 {
-    size_t len = strlen(path);
-    size_t separator = 0;
-    for (size_t i = 0; i < len; ++i) {
-        if (path[i] == '/' || path[i] == '\\') { separator = i + 1; }
+    auto *p = path;
+    auto *ret = p;
+    while (*p != '\0') {
+        if (*p == '/' || *p == '\\') { ret = p + 1; }
+        ++p;
     }
-    return path + separator;
+    return ret;
+}
+
+const char* GetFileExt(const char *path)
+{
+    path = GetFileName(path);
+    auto *p = path;
+    auto *ret = p;
+    while (*p != '\0') {
+        if (*p == '.') { ret = p + 1; }
+        ++p;
+    }
+    return ret;
 }
 
 size_t GetFileSize(const char *path)

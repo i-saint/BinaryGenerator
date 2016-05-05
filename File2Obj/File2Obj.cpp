@@ -5,29 +5,65 @@
 namespace f2o {
 
 bool File2Obj(
-    const char *path_to_input,
-    const char *path_to_obj,
-    const char *symbol_name,
+    const char *in_path,
+    const char *out_path,
+    const char *sym_name,
+    const char *section_name,
     bg::SectionFlag flags,
     bg::Architecture arch,
     bg::Format fmt)
 {
-    uint32_t size = (uint32_t)fdn::GetFileSize(path_to_input);
-    char size_name[1024];
-    sprintf(size_name, "%s_size", symbol_name);
+    uint32_t size = (uint32_t)fdn::GetFileSize(in_path);
+    std::string size_name = sym_name;
+    size_name += "_size";
+
+
+    std::string decolated_sym_name, decolated_size_name;
+    if (arch == bg::Architecture::x86) {
+        decolated_sym_name = std::string("_") + sym_name;
+        decolated_size_name = std::string("_") + size_name;
+    }
+    else {
+        decolated_sym_name = sym_name;
+        decolated_size_name = size_name;
+    }
+
 
     bool result = false;
     if (fmt == bg::Format::PECOFF) {
         auto *ctx = bg::CreatePECOFFContext(arch);
-        auto *idata = ctx->createSection(".idata", flags);
-        auto sym = idata->addExternalSymbol(nullptr, size, symbol_name);
-        fdn::ReadFile(path_to_input, idata->getData(sym), size);
-        idata->addExternalSymbol(&size, sizeof(size), size_name);
-        result = ctx->writeObj(path_to_obj);
+        auto *idata = ctx->createSection(section_name, flags);
+        auto sym = idata->addExternalSymbol(nullptr, size, decolated_sym_name.c_str());
+        fdn::ReadFile(in_path, idata->getData(sym), size);
+        idata->addExternalSymbol(&size, sizeof(size), decolated_size_name.c_str());
+        result = ctx->writeObj(out_path);
         ctx->release();
     }
     else if (fmt == bg::Format::ELF) {
 
+    }
+
+    if (result) {
+        std::string path_h;
+        auto *beg = fdn::GetFileName(out_path);
+        auto *end = fdn::GetFileExt(beg);
+        if (beg == end) {
+            path_h.assign(beg);
+        }
+        else {
+            path_h.assign(beg, end - 1);
+        }
+        path_h += ".h";
+
+        auto ofs = std::ofstream(path_h.c_str(), std::ios::out | std::ios::binary);
+        if (ofs) {
+            std::string header;
+            header += "extern \"C\" {\n";
+            header += "    extern const char *"; header += sym_name; header += ";\n";
+            header += "    extern unsigned int "; header += size_name; header += ";\n";
+            header += "}\n";
+            ofs << header;
+        }
     }
     return result;
 }
@@ -39,6 +75,7 @@ int main(int argc, char *argv[])
     std::string in_file;
     std::string out_file;
     std::string symbol_name;
+    std::string section_name = ".idata";
     bg::Architecture arch = bg::Architecture::x64;
     bg::Format fmt = bg::Format::PECOFF;
     bg::SectionFlag flags = bg::SectionFlag::IDataSection;
@@ -56,6 +93,10 @@ int main(int argc, char *argv[])
         else if (strncmp(arg, "/symbol:", 8) == 0) {
             arg += 8;
             symbol_name = arg;
+        }
+        else if (strncmp(arg, "/section:", 9) == 0) {
+            arg += 9;
+            section_name = arg;
         }
         else if (strncmp(arg, "/flags:", 7) == 0) {
             arg += 7;
@@ -87,16 +128,30 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (symbol_name.empty() && !out_file.empty()) {
+        auto *beg = fdn::GetFileName(out_file.c_str());
+        auto *end = fdn::GetFileExt(beg);
+        if (beg == end) {
+            symbol_name.assign(beg);
+        }
+        else {
+            symbol_name.assign(beg, end - 1);
+        }
+    }
+
     if (in_file.empty() || out_file.empty() || symbol_name.empty()) {
         printf(
-            "usage: file2obj /in:input_file /out:output_file"
-            " [/symbol:symbol_name] [/flags:[RWX]] [/arch:(x86|x86_64)] [/format:(PECOFF|ELF)]");
-        return 1;
+            "usage: file2obj /in:input_file /out:output_file [options]\n"
+            "options:\n"
+            "  /symbol:symbol_name (default: filename of output_file)\n"
+            "  /section:section_name (default: .idata)\n"
+            "  /flags:[RWX] (default: R)\n"
+            "  /arch:(x86|x86_64) (default: x86_64)\n"
+            "  /format:(PECOFF|ELF) (default: PECOFF)\n");
+        return 0;
     }
 
-    if (arch == bg::Architecture::x86) {
-        symbol_name = "_" + symbol_name;
-    }
-
-    return f2o::File2Obj(in_file.c_str(), out_file.c_str(), symbol_name.c_str(), flags, arch, fmt) ? 0 : 1;
+    return f2o::File2Obj(
+        in_file.c_str(), out_file.c_str(), symbol_name.c_str(), section_name.c_str(),
+        flags, arch, fmt) ? 0 : 1;
 }
