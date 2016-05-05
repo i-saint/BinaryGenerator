@@ -19,7 +19,7 @@ class Arch_ARM;
 } // namespace bg
 
 #include "Foundation/Foundation.h"
-#include "../BinaryGenerator.h"
+#include "BinaryGenerator.h"
 #include "bgString.h"
 #include "bgSymbol.h"
 #include "bgSection.h"

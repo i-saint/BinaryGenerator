@@ -27,32 +27,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DebugDump\DebugDump.h" />
-    <ClInclude Include="DebugDump\pch.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="DebugDump\ddMakeObj.cpp" />
-    <ClCompile Include="DebugDump\ddWindows.cpp" />
-    <ClCompile Include="DebugDump\DebugDump.cpp" />
-    <ClCompile Include="DebugDump\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
+    <ClCompile Include="File2Obj\File2Obj.cpp" />
+    <ClCompile Include="File2Obj\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="BinaryGenerator.vcxproj">
+    <ClInclude Include="File2Obj\File2Obj.h" />
+    <ClInclude Include="File2Obj\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BinaryGenerator.vcxproj">
       <Project>{08361722-5520-47ac-a0c2-31e8a062b73f}</Project>
     </ProjectReference>
-    <ProjectReference Include="Foundation.vcxproj">
+    <ProjectReference Include="..\Foundation.vcxproj">
       <Project>{29a8830b-b2e7-44be-b162-5ef2f46f7939}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{215DCBDB-55FF-4B3E-A2BF-C9419939409F}</ProjectGuid>
+    <ProjectGuid>{17C94EA0-835C-4A9A-9A09-AECB8F44290C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>

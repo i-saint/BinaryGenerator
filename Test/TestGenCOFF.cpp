@@ -1,4 +1,4 @@
-#include "../BinaryGenerator.h"
+#include "BinaryGenerator/BinaryGenerator.h"
 
 void Generate_COFF_x86()
 {

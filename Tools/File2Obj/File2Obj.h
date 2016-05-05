@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include "../BinaryGenerator.h"
 
 namespace f2o {
 

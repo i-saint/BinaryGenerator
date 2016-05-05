@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "../BinaryGenerator.h"
+#include "BinaryGenerator/BinaryGenerator.h"
 
 namespace dd {
 

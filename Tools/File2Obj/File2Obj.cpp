@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Foundation/Foundation.h"
+#include "BinaryGenerator/BinaryGenerator.h"
 #include "File2Obj.h"
 
 namespace f2o {
