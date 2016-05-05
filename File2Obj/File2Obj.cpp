@@ -40,10 +40,17 @@ bool File2Obj(
         ctx->release();
     }
     else if (fmt == bg::Format::ELF) {
+        printf("ELF is not supported yet.\n");
+        return false;
+    }
 
+    if (!result) {
+        printf("generated %s\n", out_path);
     }
 
     if (result) {
+        printf("generated %s\n", out_path);
+
         std::string path_h;
         auto *beg = fdn::GetFileName(out_path);
         auto *end = fdn::GetFileExt(beg);
@@ -63,6 +70,8 @@ bool File2Obj(
             header += "    extern unsigned int "; header += size_name; header += ";\n";
             header += "}\n";
             ofs << header;
+
+            printf("generated %s\n", path_h.c_str());
         }
     }
     return result;
@@ -149,6 +158,10 @@ int main(int argc, char *argv[])
             "  /arch:(x86|x86_64) (default: x86_64)\n"
             "  /format:(PECOFF|ELF) (default: PECOFF)\n");
         return 0;
+    }
+    if (!fdn::FileExists(in_file.c_str())) {
+        printf("inpt file %s doesn't exist\n", in_file.c_str());
+        return 1;
     }
 
     return f2o::File2Obj(

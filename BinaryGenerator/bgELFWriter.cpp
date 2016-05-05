@@ -61,6 +61,7 @@ ELFWriter<T>::ELFWriter(Context& ctx, IOutputStream& os)
 template<class T>
 bool ELFWriter<T>::writeObj()
 {
+    /*
     auto& sections = m_ctx.getSections();
     auto& symbols = m_ctx.getSymbolTable().getSymbols();
     auto& strings = m_ctx.getStringTable().getData();
@@ -73,7 +74,7 @@ bool ELFWriter<T>::writeObj()
     elf_sections.resize(sections.size());
     elf_rels.resize(sections.size());
     elf_syms.resize(symbols.size());
-
+    */
 
     return false;
 }

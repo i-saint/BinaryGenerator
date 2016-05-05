@@ -25,25 +25,22 @@ const char* GetFileExt(const char *path)
     return ret;
 }
 
+bool FileExists(const char *path)
+{
+    auto ifs = std::ifstream(path, std::ios::in | std::ios::binary);
+    return (bool)ifs;
+}
+
 size_t GetFileSize(const char *path)
 {
-    size_t ret = 0;
-    if (FILE *f = fopen(path, "rb")) {
-        fseek(f, 0, SEEK_END);
-        ret = ftell(f);
-        fclose(f);
-    }
-    return ret;
+    auto ifs = std::ifstream(path, std::ios::in | std::ios::binary);
+    return ifs ? (size_t)ifs.seekg(0, std::ios::end).tellg() : 0;
 }
 
 size_t ReadFile(const char *path, void *dst, size_t dst_size)
 {
-    size_t ret = 0;
-    if (FILE *f = fopen(path, "rb")) {
-        ret = fread(dst, 1, dst_size, f);
-        fclose(f);
-    }
-    return ret;
+    auto ifs = std::ifstream(path, std::ios::in | std::ios::binary);
+    return ifs ? (size_t)ifs.read((char*)dst, dst_size).gcount() : 0;
 }
 
 } // namespace fdn
