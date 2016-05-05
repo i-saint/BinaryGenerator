@@ -2,13 +2,12 @@
 namespace bg {
 
 bool operator==(const String&a, const String& b);
-bool operator==(const String&a, const char* b);
-bool operator<(const String&a, const String& b);
 
 class StringTable
 {
 public:
     StringTable(Context *ctx);
+    StringTable(Context *ctx, const StringTable& base);
     const String& addString(const char *str);
     const char* get(uint32 i);
 

@@ -13,6 +13,7 @@ void Generate_COFF_x86()
     bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), name);
     text->addRelocation(sym_code.addr + 1, "$hello", bg::RelocationType::ADDR32);
     text->addRelocation(sym_code.addr + 6, "_puts", bg::RelocationType::REL32);
+    ctx->addDLLExport(name);
 
     ctx->writeObj("SayHello_x86.obj");
     ctx->release();
@@ -31,6 +32,7 @@ void Generate_COFF_x64()
     bg::Symbol sym_code = text->addExternalSymbol(code, sizeof(code), name);
     text->addRelocation(sym_code.addr + 3, "$hello", bg::RelocationType::REL32);
     text->addRelocation(sym_code.addr + 8, "puts", bg::RelocationType::REL32);
+    ctx->addDLLExport(name);
 
     ctx->writeObj("SayHello_x64.obj");
     ctx->release();

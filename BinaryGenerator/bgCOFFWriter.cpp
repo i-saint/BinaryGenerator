@@ -65,10 +65,8 @@ private:
     void buildExportAddressTable(IMAGE_DATA_DIRECTORY& idd);
 
 
-    PECOFFContext& m_ctx;
+    PECOFFContext m_ctx; // make copy
     IOutputStream& m_os;
-
-    std::unique_ptr<Section> m_internal_section;
 };
 
 template<class Arch>
@@ -214,6 +212,10 @@ PECOFFWriter<Arch>::PECOFFWriter(PECOFFContext& ctx, IOutputStream& os)
 template<class Arch>
 bool PECOFFWriter<Arch>::writeObj()
 {
+    // build internal section data
+    buildDirective();
+
+
     auto& sections = m_ctx.getSections();
     auto& symbols = m_ctx.getSymbolTable().getSymbols();
     auto& strings = m_ctx.getStringTable().getData();
@@ -253,7 +255,7 @@ bool PECOFFWriter<Arch>::writeObj()
         isym.N.Name.Short = 0;
         isym.N.Name.Long = sym.name.addr;
         isym.Value = sym.addr;
-        isym.SectionNumber = sym.section ? sym.section->getIndex() + 1 : IMAGE_SYM_UNDEFINED;
+        isym.SectionNumber = sym.section == nullsection ? IMAGE_SYM_UNDEFINED : m_ctx.getSection(sym.section)->getIndex() + 1;
         isym.Type = IMAGE_SYM_TYPE_NULL;
         isym.StorageClass = IMAGE_SYM_CLASS_NULL;
         if ((sym.flags & SymbolFlag::Static)) {
@@ -353,25 +355,28 @@ bool PECOFFWriter<Arch>::writeDLL()
 template<class Arch>
 bool PECOFFWriter<Arch>::writePE(bool is_dll)
 {
+    // build internal section data
+    IMAGE_DATA_DIRECTORY import_dir;
+    IMAGE_DATA_DIRECTORY export_dir;
+    buildImportAddressTable(import_dir);
+    buildExportAddressTable(export_dir);
+
+
     auto& sections = m_ctx.getSections();
-    m_internal_section.reset(new Section(&m_ctx, ".intrnl", (uint32)sections.size(), SectionFlag::IData));
-    size_t num_sections = sections.size() + 1;
 
     IMAGE_DOS_HEADER dos_header;
     IMAGE_NT_HEADERS nt_headers;
     std::vector<IMAGE_SECTION_HEADER> sec_headers;
-    IMAGE_DATA_DIRECTORY import_dir;
-    IMAGE_DATA_DIRECTORY export_dir;
 
     memset(&dos_header, 0, sizeof(dos_header));
     memset(&nt_headers, 0, sizeof(nt_headers));
-    sec_headers.resize(num_sections);
+    sec_headers.resize(sections.size());
 
     uint32 section_align = 0x1000;
     uint32 file_align = 0x200; // must be 512 - 64k
     uint32 image_size = 0;
     uint32 pos_sections = uint32(
-        sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + IMAGE_SIZEOF_SECTION_HEADER * num_sections);
+        sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + IMAGE_SIZEOF_SECTION_HEADER * sections.size());
 
     {
         // set virtual addresses
@@ -386,14 +391,6 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
             pos += s->getSize() + (section_align - 1);
             pos &= ~(section_align - 1);
         }
-
-        // build internal section data
-        m_internal_section->setVirtualAddress(pos);
-        buildImportAddressTable(import_dir);
-        buildExportAddressTable(export_dir);
-        pos += m_internal_section->getSize() + (section_align - 1);
-        pos &= ~(section_align - 1);
-
         image_size = pos;
     }
 
@@ -403,7 +400,7 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
     {
         auto& fh = nt_headers.FileHeader;
         fh.Machine = getMachineType();
-        fh.NumberOfSections = (WORD)num_sections;
+        fh.NumberOfSections = (WORD)sections.size();
         fh.TimeDateStamp = 0;
         fh.PointerToSymbolTable = 0;
         fh.NumberOfSymbols = 0;
@@ -477,7 +474,6 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
             spos = buildSectionHeader(sec_headers[si], *sections[si], spos, file_align, true);
             spos = align(spos, file_align);
         }
-        spos = buildSectionHeader(sec_headers.back(), *m_internal_section, spos, file_align, true);
     }
 
     m_os.write(&dos_header, sizeof(dos_header));
@@ -491,10 +487,6 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
         m_os.write(s->getData(), s->getSize());
         wpos = align(m_os, wpos + s->getSize(), file_align);
     }
-    {
-        m_os.write(m_internal_section->getData(), m_internal_section->getSize());
-        wpos = align(m_os, wpos + m_internal_section->getSize(), file_align);
-    }
 
     return true;
 }
@@ -503,6 +495,25 @@ bool PECOFFWriter<Arch>::writePE(bool is_dll)
 template<class Arch>
 void PECOFFWriter<Arch>::buildDirective()
 {
+    auto& exports = m_ctx.getDLLExports();
+    auto& libraries = m_ctx.getLibraries();
+
+    std::string tmp;
+    for (const auto& s : exports) {
+        tmp += "/EXPORT:";
+        tmp += s;
+        tmp += " ";
+    }
+    for (const auto& l : libraries) {
+        tmp += "/DEFAULTLIB:";
+        tmp += l;
+        tmp += " ";
+    }
+
+    if (!tmp.empty()) {
+        auto* directive = m_ctx.createSection(".drectve", SectionFlag::InfoSection);
+        directive->addStaticSymbol(tmp.c_str(), tmp.size(), ".drectve");
+    }
 }
 
 template<class Arch>
@@ -515,6 +526,8 @@ void PECOFFWriter<Arch>::buildImportAddressTable(IMAGE_DATA_DIRECTORY& idd)
 template<class Arch>
 void PECOFFWriter<Arch>::buildExportAddressTable(IMAGE_DATA_DIRECTORY& idd)
 {
+    auto* idata = m_ctx.createSection(".idata", SectionFlag::IDataSection);
+
     auto& symtab = m_ctx.getSymbolTable();
     auto& exports = m_ctx.getDLLExports();
     auto& filename = m_ctx.getFileName();
@@ -524,19 +537,19 @@ void PECOFFWriter<Arch>::buildExportAddressTable(IMAGE_DATA_DIRECTORY& idd)
     }
 
     // reserve data spaces
-    uint32 va = m_internal_section->getVirtualAddress();
-    uint32 pos_ied      = m_internal_section->addData(nullptr, sizeof(IMAGE_EXPORT_DIRECTORY));
-    uint32 pos_funcs    = m_internal_section->addData(nullptr, sizeof(intptr) * exports.size());
-    uint32 pos_names    = m_internal_section->addData(nullptr, sizeof(uint32) * exports.size());
-    uint32 pos_ordinals = m_internal_section->addData(nullptr, sizeof(uint16) * exports.size());
-    uint32 pos_nametable= m_internal_section->addData(nullptr, size_nametable);
+    uint32 va = idata->getVirtualAddress();
+    uint32 pos_ied      = idata->addData(nullptr, sizeof(IMAGE_EXPORT_DIRECTORY));
+    uint32 pos_funcs    = idata->addData(nullptr, sizeof(intptr) * exports.size());
+    uint32 pos_names    = idata->addData(nullptr, sizeof(uint32) * exports.size());
+    uint32 pos_ordinals = idata->addData(nullptr, sizeof(uint16) * exports.size());
+    uint32 pos_nametable= idata->addData(nullptr, size_nametable);
 
     // pointers to actual data
-    auto* ied = (IMAGE_EXPORT_DIRECTORY*)(m_internal_section->getData() + pos_ied);
-    auto* funcs = (intptr*)(m_internal_section->getData() + pos_funcs);
-    auto* names = (uint32*)(m_internal_section->getData() + pos_names);
-    auto* ordinals = (uint16*)(m_internal_section->getData() + pos_ordinals);
-    auto* nametable = (char*)(m_internal_section->getData() + pos_nametable);
+    auto* ied = (IMAGE_EXPORT_DIRECTORY*)(idata->getData() + pos_ied);
+    auto* funcs = (intptr*)(idata->getData() + pos_funcs);
+    auto* names = (uint32*)(idata->getData() + pos_names);
+    auto* ordinals = (uint16*)(idata->getData() + pos_ordinals);
+    auto* nametable = (char*)(idata->getData() + pos_nametable);
 
     // build export data
     {
@@ -566,7 +579,7 @@ void PECOFFWriter<Arch>::buildExportAddressTable(IMAGE_DATA_DIRECTORY& idd)
     ied->AddressOfNameOrdinals = va + pos_ordinals;
 
     idd.VirtualAddress = va + pos_ied;
-    idd.Size = m_internal_section->getSize() - pos_ied;
+    idd.Size = idata->getSize() - pos_ied;
 }
 
 

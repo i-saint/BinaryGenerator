@@ -12,4 +12,25 @@ const char* GetFilename(const char *path)
     return path + separator;
 }
 
+size_t GetFileSize(const char *path)
+{
+    size_t ret = 0;
+    if (FILE *f = fopen(path, "rb")) {
+        fseek(f, 0, SEEK_END);
+        ret = ftell(f);
+        fclose(f);
+    }
+    return ret;
+}
+
+size_t ReadFile(const char *path, void *dst, size_t dst_size)
+{
+    size_t ret = 0;
+    if (FILE *f = fopen(path, "rb")) {
+        ret = fread(dst, 1, dst_size, f);
+        fclose(f);
+    }
+    return ret;
+}
+
 } // namespace fdn

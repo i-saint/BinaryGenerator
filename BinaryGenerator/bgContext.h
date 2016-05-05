@@ -5,6 +5,7 @@ class Context
 {
 public:
     Context(Architecture arch);
+    Context(const Context &from);
     virtual ~Context();
 
     size_t      getNumSections() const;
@@ -23,6 +24,8 @@ public:
     SymbolTable&    getSymbolTable();
     StringTable&    getStringTable();
 
+    const char*     str(String s) const;
+
 protected:
     Architecture        m_arch;
     Sections            m_sections;
@@ -36,6 +39,7 @@ class PECOFFContext : public Context, public IPECOFFContext
 typedef Context super;
 public:
     PECOFFContext(Architecture arch);
+    PECOFFContext(const PECOFFContext &base) = default;
     ~PECOFFContext() override;
     void        release() override;
 

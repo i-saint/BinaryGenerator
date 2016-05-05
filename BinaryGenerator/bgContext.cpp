@@ -27,6 +27,16 @@ Context::Context(Architecture arch)
 {
 }
 
+Context::Context(const Context &from)
+    : m_arch(from.m_arch)
+    , m_sym(new SymbolTable(this, *from.m_sym))
+    , m_str(new StringTable(this, *from.m_str))
+{
+    for (auto& s : from.m_sections) {
+        m_sections.emplace_back(s->clone());
+    }
+}
+
 Context::~Context()
 {
 }
@@ -66,6 +76,10 @@ Context::Sections&      Context::getSections() { return m_sections; }
 SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
 
+const char* Context::str(String s) const
+{
+    return m_str->get(s.addr);
+}
 
 PECOFFContext::PECOFFContext(Architecture arch)
     : super(arch)
@@ -73,6 +87,7 @@ PECOFFContext::PECOFFContext(Architecture arch)
     , m_subsystem(Subsystem::GUI)
 {
 }
+
 PECOFFContext::~PECOFFContext()
 {
 }

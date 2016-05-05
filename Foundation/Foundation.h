@@ -2,6 +2,8 @@
 namespace fdn {
 
 const char* GetFilename(const char *path);
+size_t GetFileSize(const char *path);
+size_t ReadFile(const char *path, void *dst, size_t dst_size);
 
 // F: [](size_t size) -> void* : alloc func (e.g.: malloc)
 template<class F>

@@ -8,6 +8,12 @@ SymbolTable::SymbolTable(Context *ctx)
 {
 }
 
+SymbolTable::SymbolTable(Context *ctx, const SymbolTable& base)
+    : m_ctx(ctx)
+    , m_symbols(base.m_symbols)
+{
+}
+
 SymbolTable::Symbols& SymbolTable::getSymbols()
 {
     return m_symbols;
@@ -15,7 +21,7 @@ SymbolTable::Symbols& SymbolTable::getSymbols()
 
 Symbol& SymbolTable::addSymbol(const Symbol& sym)
 {
-    if (Symbol *i = findSymbol(sym.name.str())) {
+    if (Symbol *i = findSymbol(m_ctx->str(sym.name))) {
         return *i;
     }
 
@@ -34,7 +40,7 @@ Symbol* SymbolTable::findSymbol(const char *name)
 {
     if (!name) { return nullptr; }
     for (auto& s : m_symbols) {
-        if (strcmp(s.name.str(), name) == 0) {
+        if (strcmp(m_ctx->str(s.name), name) == 0) {
             return &s;
         }
     }
@@ -47,7 +53,9 @@ uint32 SymbolTable::getVirtualAddress(const char *name)
     if (!sym) { return 0; }
 
     uint32 ret = sym->addr;
-    if (sym->section) { ret += sym->section->getVirtualAddress(); }
+    if (sym->section != nullsection) {
+        ret += m_ctx->getSection(sym->section)->getVirtualAddress();
+    }
     return ret;
 }
 

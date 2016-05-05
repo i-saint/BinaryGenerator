@@ -30,6 +30,8 @@ public:
 
 public:
     using Relocations = std::vector<Relocation>;
+
+    Section*        clone() const;
     Relocations&    getRelocations();
 
 private:

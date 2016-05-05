@@ -12,12 +12,7 @@ bool File2Obj(
     bg::Architecture arch,
     bg::Format fmt)
 {
-    void *content = nullptr;
-    size_t content_size = 0;
-    fdn::MapFile(path_to_input, content, content_size, malloc);
-    if (content == nullptr) { return false; }
-
-    uint32_t size = (uint32_t)content_size;
+    uint32_t size = (uint32_t)fdn::GetFileSize(path_to_input);
     char size_name[1024];
     sprintf(size_name, "%s_size", symbol_name);
 
@@ -25,7 +20,8 @@ bool File2Obj(
     if (fmt == bg::Format::PECOFF) {
         auto *ctx = bg::CreatePECOFFContext(arch);
         auto *idata = ctx->createSection(".idata", flags);
-        idata->addExternalSymbol(content, size, symbol_name);
+        auto sym = idata->addExternalSymbol(nullptr, size, symbol_name);
+        fdn::ReadFile(path_to_input, idata->getData(sym), size);
         idata->addExternalSymbol(&size, sizeof(size), size_name);
         result = ctx->writeObj(path_to_obj);
         ctx->release();
@@ -33,8 +29,6 @@ bool File2Obj(
     else if (fmt == bg::Format::ELF) {
 
     }
-
-    free(content);
     return result;
 }
 

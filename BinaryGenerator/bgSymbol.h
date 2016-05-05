@@ -8,6 +8,7 @@ public:
 
 public:
     SymbolTable(Context *ctx);
+    SymbolTable(Context *ctx, const SymbolTable& base);
     Symbols& getSymbols();
     Symbol& addSymbol(const Symbol& sym);
     Symbol* getSymbol(size_t i);

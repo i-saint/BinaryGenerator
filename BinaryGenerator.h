@@ -93,19 +93,19 @@ enum class Subsystem
     GUI,
 };
 
+const uint32 nullsection = uint32(-1);
+
+
 
 struct String
 {
 public:
-    const char* str() const;
-
-    StringTable *table;
     uint32      addr;
 };
 
 struct Symbol
 {
-    ISection    *section;
+    uint32      section;
     uint32      index;
     uint32      addr;
     SymbolFlag  flags; // combination of SymbolFlags
@@ -114,7 +114,7 @@ struct Symbol
 
 struct Relocation
 {
-    ISection        *section;
+    uint32          section;
     uint32          addr;
     uint32          symbol_index;
     RelocationType  type;
@@ -181,12 +181,6 @@ public:
     // add undef symbol
     virtual Symbol addUndefinedSymbol(const char *name) = 0;
 
-    // utilities
-    Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag::Static); }
-    Symbol addExternalSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag::External); }
-    Symbol addStaticSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag::Static); }
-    Symbol addExternalSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag::External); }
-
     // if symbol with name symbol_name doesn't exist, it will be added as undefined symbol
     virtual Relocation  addRelocation(uint32 pos, const char *symbol_name, RelocationType type) = 0;
     virtual Relocation  addRelocation(uint32 pos, uint32 symbol_index, RelocationType type) = 0;
@@ -199,6 +193,13 @@ public:
     virtual char*       getData() = 0;
 
     virtual void        setVirtualAddress(uint32 va)  = 0;
+
+    // utilities
+    Symbol addStaticSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag::Static); }
+    Symbol addExternalSymbol(const void *data, size_t len, const char *name) { return addSymbol(data, len, name, SymbolFlag::External); }
+    Symbol addStaticSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag::Static); }
+    Symbol addExternalSymbol(uint32 pos, const char *name) { return addSymbol(pos, name, SymbolFlag::External); }
+    char* getData(const Symbol& sym) { return getData() + sym.addr; }
 };
 
 

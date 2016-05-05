@@ -38,7 +38,7 @@ Symbol Section::addSymbol(const void *data, size_t len, const char *name, Symbol
 Symbol Section::addSymbol(uint32 addr, const char *name, SymbolFlag flags)
 {
     auto ret = Symbol();
-    ret.section = this;
+    ret.section = m_index;
     ret.index = 0;
     ret.addr = addr;
     ret.flags = flags;
@@ -49,7 +49,7 @@ Symbol Section::addSymbol(uint32 addr, const char *name, SymbolFlag flags)
 Symbol Section::addUndefinedSymbol(const char *name)
 {
     auto ret = Symbol();
-    ret.section = nullptr;
+    ret.section = nullsection;
     ret.index = 0;
     ret.addr = 0;
     ret.flags = SymbolFlag::External;
@@ -65,7 +65,7 @@ Relocation Section::addRelocation(uint32 pos, const char *sym_name, RelocationTy
 Relocation Section::addRelocation(uint32 pos, uint32 symbol_index, RelocationType type)
 {
     auto ret = Relocation();
-    ret.section = this;
+    ret.section = m_index;
     ret.addr = pos;
     ret.symbol_index = symbol_index;
     ret.type = type;
@@ -82,6 +82,11 @@ uint32 Section::getSize() const { return (uint32)m_data.size(); }
 char* Section::getData() { return m_data.empty() ? nullptr : &m_data[0]; }
 
 void Section::setVirtualAddress(uint32 va) { m_virtual_addr = va; }
+
+Section* Section::clone() const
+{
+    return new Section(*this);
+}
 
 Section::Relocations& Section::getRelocations() { return m_reloc; }
 

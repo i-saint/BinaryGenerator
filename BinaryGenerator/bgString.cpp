@@ -3,28 +3,22 @@
 
 namespace bg {
 
-const char* String::str() const
-{
-    return table == nullptr ? nullptr : table->get(addr);
-}
-
 bool operator==(const String&a, const String& b)
 {
-    return std::strcmp(a.str(), b.str()) == 0;
-}
-bool operator==(const String&a, const char* b)
-{
-    return std::strcmp(a.str(), b) == 0;
-}
-bool operator<(const String&a, const String& b)
-{
-    return std::strcmp(a.str(), b.str()) < 0;
+    return a.addr == b.addr;
 }
 
 
 
 StringTable::StringTable(Context *ctx)
     : m_ctx(ctx)
+{
+}
+
+StringTable::StringTable(Context *ctx, const StringTable& base)
+    : m_ctx(ctx)
+    , m_table(base.m_table)
+    , m_entries(base.m_entries)
 {
 }
 
@@ -38,7 +32,7 @@ const String& StringTable::addString(const char *str)
         auto addr = (uint32)m_table.size() + 4;
         m_table.insert(m_table.end(), str, str + strlen(str) + 1);
 
-        String tmp = {this, addr};
+        String tmp = {addr};
         auto e = m_entries.insert(std::make_pair(str, tmp));
         return e.first->second;
     }
