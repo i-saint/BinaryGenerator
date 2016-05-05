@@ -141,6 +141,8 @@ public:
     virtual ISection*   findSection(const char *name) = 0;
     // flags: combination of SectionType
     virtual ISection*   createSection(const char *name, SectionFlag flags) = 0;
+
+    virtual const char* getString(String s) const = 0;
 };
 
 class IPECOFFContext : public IContext

@@ -22,8 +22,8 @@ public:
 
 Context::Context(Architecture arch)
     : m_arch(arch)
-    , m_sym(new SymbolTable(this))
-    , m_str(new StringTable(this))
+    , m_sym(std::make_unique<SymbolTable>(this))
+    , m_str(std::make_unique<StringTable>(this))
 {
 }
 
@@ -72,14 +72,14 @@ Section* Context::createSection(const char *name, SectionFlag flags)
     return s;
 }
 
+const char* Context::getString(String s) const
+{
+    return m_str->getString(s.addr);
+}
+
 Context::Sections&      Context::getSections() { return m_sections; }
 SymbolTable&            Context::getSymbolTable() { return *m_sym; }
 StringTable&            Context::getStringTable() { return *m_str; }
-
-const char* Context::str(String s) const
-{
-    return m_str->get(s.addr);
-}
 
 PECOFFContext::PECOFFContext(Architecture arch)
     : super(arch)
@@ -97,6 +97,8 @@ size_t PECOFFContext::getNumSections() const { return super::getNumSections(); }
 Section* PECOFFContext::getSection(size_t i) { return super::getSection(i); }
 Section* PECOFFContext::findSection(const char *name) { return super::findSection(name); }
 Section* PECOFFContext::createSection(const char *name, SectionFlag flags) { return super::createSection(name, flags); }
+
+const char* PECOFFContext::getString(String s) const { return super::getString(s); }
 
 void PECOFFContext::setBaseAddress(uint64 addr)
 {

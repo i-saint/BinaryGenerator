@@ -38,7 +38,7 @@ const String& StringTable::addString(const char *str)
     }
 }
 
-const char* StringTable::get(uint32 i)
+const char* StringTable::getString(uint32 i)
 {
     return &m_table[i - 4];
 }

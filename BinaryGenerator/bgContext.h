@@ -13,6 +13,8 @@ public:
     Section*    findSection(const char *name);
     // flags: combination of SectionType
     Section*    createSection(const char *name, SectionFlag flags);
+    
+    const char* getString(String s) const;
 
 public:
     using SectionPtr     = std::unique_ptr<Section>;
@@ -23,8 +25,6 @@ public:
     Sections&       getSections();
     SymbolTable&    getSymbolTable();
     StringTable&    getStringTable();
-
-    const char*     str(String s) const;
 
 protected:
     Architecture        m_arch;
@@ -47,6 +47,8 @@ public:
     Section*    getSection(size_t i) override;
     Section*    findSection(const char *name) override;
     Section*    createSection(const char *name, SectionFlag flags) override;
+
+    const char* getString(String s) const override;
 
     void        setBaseAddress(uint64 addr) override;
     void        setSubsystem(Subsystem ss) override;

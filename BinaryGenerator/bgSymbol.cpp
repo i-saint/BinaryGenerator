@@ -21,7 +21,7 @@ SymbolTable::Symbols& SymbolTable::getSymbols()
 
 Symbol& SymbolTable::addSymbol(const Symbol& sym)
 {
-    if (Symbol *i = findSymbol(m_ctx->str(sym.name))) {
+    if (Symbol *i = findSymbol(m_ctx->getString(sym.name))) {
         return *i;
     }
 
@@ -40,7 +40,7 @@ Symbol* SymbolTable::findSymbol(const char *name)
 {
     if (!name) { return nullptr; }
     for (auto& s : m_symbols) {
-        if (strcmp(m_ctx->str(s.name), name) == 0) {
+        if (strcmp(m_ctx->getString(s.name), name) == 0) {
             return &s;
         }
     }

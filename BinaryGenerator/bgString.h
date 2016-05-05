@@ -9,7 +9,7 @@ public:
     StringTable(Context *ctx);
     StringTable(Context *ctx, const StringTable& base);
     const String& addString(const char *str);
-    const char* get(uint32 i);
+    const char* getString(uint32 i);
 
 public:
     const std::string& getData() const;
