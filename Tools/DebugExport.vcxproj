@@ -31,7 +31,8 @@
     <ClInclude Include="DebugExport\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DebugExport\deMakeObj.cpp" />
+    <ClCompile Include="DebugExport\deContext.cpp" />
+    <ClCompile Include="DebugExport\deGenerateObj.cpp" />
     <ClCompile Include="DebugExport\deWindows.cpp" />
     <ClCompile Include="DebugExport\DebugExport.cpp" />
     <ClCompile Include="DebugExport\pch.cpp">

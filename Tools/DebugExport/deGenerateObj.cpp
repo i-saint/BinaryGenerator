@@ -1,20 +1,20 @@
 #include "pch.h"
 #include "DebugExport.h"
 
-namespace dd {
+namespace de {
 
-static std::string MakeExportDirective(Symbols& syms)
+std::string Context::makeExportDirective() const
 {
     std::string ret;
     char buf[2048];
-    for (auto& s : syms) {
-        sprintf(buf, "/EXPORT:%s ", s.name.c_str());
+    for (auto& s : m_syms) {
+        sprintf(buf, "/EXPORT:%s ", getName(s));
         ret += buf;
     }
     return ret;
 }
 
-static void WriteObj_COFF_x86(bg::IOutputStream& os, Symbols& syms)
+void Context::generateObj_COFF_x86(const char *out_path) const
 {
     typedef uint32 intptr;
 
@@ -22,25 +22,25 @@ static void WriteObj_COFF_x86(bg::IOutputStream& os, Symbols& syms)
     auto *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
     auto *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
 
-    uint32 num_syms = (uint32)syms.size();
+    uint32 num_syms = (uint32)m_syms.size();
     uint8 code[10] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    for (size_t si = 0; si < syms.size(); ++si) {
-        auto& sym = syms[si];
-        bg::Symbol s = text->addExternalSymbol(code, sizeof(code), sym.name.c_str());
+    for (size_t si = 0; si < m_syms.size(); ++si) {
+        auto& sym = m_syms[si];
+        bg::Symbol s = text->addExternalSymbol(code, sizeof(code), getName(sym));
         intptr *addr = (intptr*)(text->getData() + s.addr + 6);
         *addr = sym.addr;
     }
     text->addExternalSymbol(0, "_g_jumptable");
     text->addExternalSymbol(&num_syms, sizeof(num_syms), "_g_num_symbols");
 
-    auto exports = MakeExportDirective(syms);
+    auto exports = makeExportDirective();
     directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
-    ctx->writeObj(os);
+    ctx->writeObj(out_path);
     ctx->release();
 }
 
-static void WriteObj_COFF_x64(bg::IOutputStream& os, Symbols& syms)
+void Context::generateObj_COFF_x64(const char *out_path) const
 {
     typedef uint64 intptr;
 
@@ -48,34 +48,39 @@ static void WriteObj_COFF_x64(bg::IOutputStream& os, Symbols& syms)
     auto *directive = ctx->createSection(".drectve", bg::SectionFlag::Info);
     auto *text = ctx->createSection(".textx", bg::SectionFlag::TextXSection);
 
-    uint32 num_syms = (uint32)syms.size();
+    uint32 num_syms = (uint32)m_syms.size();
     uint8 code[14] = {0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    for (size_t si = 0; si < syms.size(); ++si) {
-        auto& sym = syms[si];
-        bg::Symbol s = text->addExternalSymbol(code, sizeof(code), sym.name.c_str());
+    for (size_t si = 0; si < m_syms.size(); ++si) {
+        auto& sym = m_syms[si];
+        bg::Symbol s = text->addExternalSymbol(code, sizeof(code), getName(sym));
         intptr *addr = (intptr*)(text->getData() + s.addr + 6);
         *addr = sym.addr;
     }
     text->addExternalSymbol(0, "g_jumptable");
     text->addExternalSymbol(&num_syms, sizeof(num_syms), "g_num_symbols");
 
-    auto exports = MakeExportDirective(syms);
+    auto exports = makeExportDirective();
     directive->addStaticSymbol(exports.c_str(), exports.size(), ".drectve");
 
-    ctx->writeObj(os);
+    ctx->writeObj(out_path);
     ctx->release();
 }
 
-void WriteObj(bg::IOutputStream& os, Symbols& syms, bg::Architecture arch)
+void Context::generateObj(const char *out_path, bg::Format fmt, bg::Architecture arch)
 {
-    switch (arch) {
-    case bg::Architecture::x86:
-        WriteObj_COFF_x86(os, syms);
-        break;
-    case bg::Architecture::x64:
-        WriteObj_COFF_x64(os, syms);
-        break;
+    if (fmt == bg::Format::PECOFF) {
+        switch (arch) {
+        case bg::Architecture::x86:
+            generateObj_COFF_x86(out_path);
+            break;
+        case bg::Architecture::x64:
+            generateObj_COFF_x64(out_path);
+            break;
+        }
+    }
+    else if (fmt == bg::Format::ELF) {
+        // elf is not implemented yet
     }
 }
 
-} // namespace dd
+} // namespace de

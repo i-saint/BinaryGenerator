@@ -23,7 +23,10 @@
     <ClCompile Include="DebugExport\deWindows.cpp">
       <Filter>DebugExport</Filter>
     </ClCompile>
-    <ClCompile Include="DebugExport\deMakeObj.cpp">
+    <ClCompile Include="DebugExport\deContext.cpp">
+      <Filter>DebugExport</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugExport\deGenerateObj.cpp">
       <Filter>DebugExport</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,22 +9,22 @@
 
 #include "DebugExport.h"
 
-namespace dd {
+namespace de {
 
 BOOL CALLBACK SymCallback(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext)
 {
-    auto& ret = *((Symbols*)UserContext);
+    auto& handler = *((const SymbolHandler*)UserContext);
 
-    Symbol sym;
-    sym.name = std::string(pSymInfo->Name, pSymInfo->Name + pSymInfo->NameLen);
-    sym.addr = uint32(pSymInfo->Address - pSymInfo->ModBase);
-    sym.size = pSymInfo->Size;
-    ret.emplace_back(sym);
+    const char *name = pSymInfo->Name;
+    size_t name_len = pSymInfo->NameLen;
+    void *addr = (void*)(pSymInfo->Address - pSymInfo->ModBase);
+    size_t size = pSymInfo->Size;
+    handler(name, addr, size);
 
     return TRUE;
 }
 
-Symbols GatherSymbols(const Config& conf)
+void GatherSymbols(const Config& conf, const SymbolHandler& sh)
 {
     HANDLE proc = conf.target_process != nullptr ? (HANDLE)conf.target_process : ::GetCurrentProcess();
     DWORD opt = SYMOPT_DEFERRED_LOADS;
@@ -33,10 +33,8 @@ Symbols GatherSymbols(const Config& conf)
 
     char filter[256];
     sprintf(filter, "%s!*", conf.target_module ? conf.target_module : "*");
-    Symbols ret;
-    ::SymEnumSymbols(proc, 0, filter, SymCallback, &ret);
-    return ret;
+    ::SymEnumSymbols(proc, 0, filter, SymCallback, (void*)&sh);
 }
 
-} // namespace dd
+} // namespace de
 #endif // _WIN32
