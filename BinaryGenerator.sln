@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Foundation", "Foundation.vc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{413B8A27-77C1-4AE6-B000-4F8D7FDCC72E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebugDump", "Tools\DebugDump.vcxproj", "{215DCBDB-55FF-4B3E-A2BF-C9419939409F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebugExport", "Tools\DebugExport.vcxproj", "{215DCBDB-55FF-4B3E-A2BF-C9419939409F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "File2Obj", "Tools\File2Obj.vcxproj", "{17C94EA0-835C-4A9A-9A09-AECB8F44290C}"
 EndProject

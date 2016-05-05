@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "DebugDump.h"
+#include "DebugExport.h"
 
 int main(int argc, char *argv[])
 {

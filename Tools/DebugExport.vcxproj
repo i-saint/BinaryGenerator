@@ -27,14 +27,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DebugDump\DebugDump.h" />
-    <ClInclude Include="DebugDump\pch.h" />
+    <ClInclude Include="DebugExport\DebugExport.h" />
+    <ClInclude Include="DebugExport\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DebugDump\ddMakeObj.cpp" />
-    <ClCompile Include="DebugDump\ddWindows.cpp" />
-    <ClCompile Include="DebugDump\DebugDump.cpp" />
-    <ClCompile Include="DebugDump\pch.cpp">
+    <ClCompile Include="DebugExport\deMakeObj.cpp" />
+    <ClCompile Include="DebugExport\deWindows.cpp" />
+    <ClCompile Include="DebugExport\DebugExport.cpp" />
+    <ClCompile Include="DebugExport\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterLib|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='MasterDLL|x64'">Create</PrecompiledHeader>

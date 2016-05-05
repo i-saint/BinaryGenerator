@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DebugExport">
+      <UniqueIdentifier>{938044ae-5d17-44a5-b1a4-b67ec9f1fd01}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DebugExport\pch.h">
+      <Filter>DebugExport</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugExport\DebugExport.h">
+      <Filter>DebugExport</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DebugExport\DebugExport.cpp">
+      <Filter>DebugExport</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugExport\pch.cpp">
+      <Filter>DebugExport</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugExport\deWindows.cpp">
+      <Filter>DebugExport</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugExport\deMakeObj.cpp">
+      <Filter>DebugExport</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

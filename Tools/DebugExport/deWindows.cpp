@@ -7,7 +7,7 @@
 #pragma comment(lib, "dbghelp.lib")
 #pragma comment(lib, "psapi.lib")
 
-#include "DebugDump.h"
+#include "DebugExport.h"
 
 namespace dd {
 
