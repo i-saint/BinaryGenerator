@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     std::string in_file;
     std::string out_file;
     std::string symbol_name;
-    std::string section_name = ".idata";
+    std::string section_name = ".rdata";
     bg::Architecture arch = bg::Architecture::x64;
     bg::Format fmt = bg::Format::PECOFF;
     bg::SectionFlag flags = bg::SectionFlag::IDataSection;
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
             "usage: file2obj /in:input_file /out:output_file [options]\n"
             "options:\n"
             "  /symbol:symbol_name (default: filename of output_file)\n"
-            "  /section:section_name (default: .idata)\n"
+            "  /section:section_name (default: .rdata)\n"
             "  /flags:[RWX] (default: R)\n"
             "  /arch:(x86|x86_64) (default: x86_64)\n"
             "  /format:(PECOFF|ELF) (default: PECOFF)\n");
