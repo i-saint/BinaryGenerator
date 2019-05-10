@@ -53,8 +53,8 @@ bool File2Obj(
         printf("generated %s\n", out_path);
 
         std::string path_h;
-        auto *beg = fdn::GetFileName(out_path);
-        auto *end = fdn::GetFileExt(beg);
+        auto *beg = out_path;
+        auto *end = fdn::GetFileExt(fdn::GetFileName(out_path));
         if (beg == end) {
             path_h.assign(beg);
         }
